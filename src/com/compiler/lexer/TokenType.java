@@ -3,8 +3,8 @@ package com.compiler.lexer;
 public enum TokenType {
 
     // Single character tokens
-    LEFT_PARENTHESIS,       //"{"
-    RIGHT_PARENTHESIS,      //"}"
+    LEFT_PAREN,              //"{"
+    RIGHT_PAREN,             //"}"
     LEFT_BRACKET,           //"("
     RIGHT_BRACKET,          //")"
     LEFT_SQUARE_BRACKET,    //"["

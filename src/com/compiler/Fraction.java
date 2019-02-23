@@ -5,12 +5,12 @@ public class Fraction {
     int nominator;
     int denominator;
 
-    Fraction(int nomin, int denomin){
+    public Fraction(int nomin, int denomin){
         nominator = nomin;
         denominator = denomin;
     };
 
-    Fraction(String value){
+    public Fraction(String value){
 
     };
 

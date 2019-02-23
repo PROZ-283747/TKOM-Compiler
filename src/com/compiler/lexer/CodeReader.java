@@ -2,32 +2,29 @@ package com.compiler.lexer;
 
 import java.io.*;
 
-public class CodeReader {
+public class CodeReader{
 
     private final Position currentPos; // Position of recently read char
-   //private final StringBuilder readBuffer; // Keeps what has been read but wasn't used yet.
     private File file;
     private BufferedReader reader;
-    private boolean EOF = false;
-
-    private char nextChar = '\0';  // character read by peek() it can be sometimes empty
-    private char lastChar = '\0'; // last read char
+    private final boolean EOF = false;
+    //private char nextChar = '\0';  // character read by peek() it can be sometimes empty
+    private char currChar = '\0'; // sign to read first
 
     public CodeReader(Reader reader) {
-        currentPos = new Position(1, 0);
+        currentPos = new Position(1, 1);
         this.reader = new BufferedReader(reader);
-        //this.readBuffer = new StringBuilder();
     }
 
-    public CodeReader(String fileName){
-        currentPos = new Position(1, 0);
+    public CodeReader(String fileName) throws IOException {
+        currentPos = new Position(1, 1);
         try {
             file = new File(fileName);
             reader = new BufferedReader(new FileReader(file));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-       // this.readBuffer = new StringBuilder();
+        currChar = (char)reader.read();   // TODO: is this correct ?
     }
 
 
@@ -39,19 +36,27 @@ public class CodeReader {
         return currentPos;
     }
 
-    public char getChar() throws IOException {
-        char c;
-        if(lastChar == '\0')
-            c = (char) reader.read();
-        else if()
+    public char getChar(){
+        //System.out.println("currChar: " + currChar);
+        //System.out.println("nextChar: " + nextChar);
 
-        System.out.println(c);
+        if(currChar == '\n'){
+            currentPos.incrementLine();
+            currentPos.setColumn(0);
+        }
+        currentPos.incrementColumn();
+
+        char c = currChar;
+        try {
+            currChar = (char) reader.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return c;
     }
 
-    private char peek() {
-        if (isAtEnd()) return '\0';
-        return 'c';
+    public char peek(){
+        return currChar;
     }
-
 }

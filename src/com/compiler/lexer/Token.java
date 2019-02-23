@@ -16,9 +16,13 @@ public class Token {
     Token(TokenType type, String lexeme, int line, int column) {
         this.type = type;
         this.lexeme = lexeme;
-        //this.literal = literal;
         this.line = line;
         this.column = column;
+        if(type==TokenType.NUMBER){
+            //TODO set fraction using lexeme
+            Fraction f = new Fraction(lexeme);
+            //fraction = f;
+        }
     }
 
     public TokenType getType() {
@@ -41,6 +45,6 @@ public class Token {
         return line;
     }
     public String toString() {
-        return type + " " + lexeme;
+        return "type: " + type + " \"" + lexeme + "\"" + " line: " + line +" column: " + column;
     }
 }
