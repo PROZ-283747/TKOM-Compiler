@@ -26,6 +26,10 @@ public class Position {
         this.column++;
     }
 
+    public void decrementColumn() {
+        this.column--;
+    }
+
     public int line() {
         return getLine();
     }

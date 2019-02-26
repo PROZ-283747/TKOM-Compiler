@@ -4,12 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static sun.nio.ch.IOStatus.EOF;
+
 
 public class Lexer{
 
     private CodeReader reader;
     public Token lastToken; // last created token
-    private Boolean EOF = false;
     private StringBuilder lexeme;
 
     private static final Map<String, TokenType> keywords;
@@ -42,8 +43,6 @@ public class Lexer{
         keywords.put("\'", TokenType.APOSTROPHE);
         keywords.put("/", TokenType.SLASH);
         keywords.put("*", TokenType.STAR);
-        keywords.put("#", TokenType.HASH);
-
     }
 
     {
@@ -61,7 +60,6 @@ public class Lexer{
         functions.put('\'', () -> setToken(TokenType.APOSTROPHE));
         functions.put('/', () -> setToken(TokenType.SLASH));
         functions.put('*', () -> setToken(TokenType.STAR));
-        functions.put('#', () -> setToken(TokenType.HASH));
 
         functions.put('+', () -> setToken(expect('=') ? TokenType.PLUS : TokenType.PLUS_EQUAL));
         functions.put('+', () -> setToken(expect('+') ? TokenType.PLUS : TokenType.INCREMENTATION));
@@ -91,12 +89,11 @@ public class Lexer{
     }
 
     public Token getToken() {
-        //System.out.println("getToken");
         skipUnrelevant();
-
+        
         char c = advance();
-
-        if(isEOF() || c == (char) -1 || c == (char) 0x04){
+        
+        if(c == EOF || c == (char) -1 || c == (char) 0x04){
             return new Token(TokenType.END_OF_FILE, "", getLine(), getColumn());
         }
         Token token = functions.getOrDefault(c, () -> unexpCharError(c)).get();
@@ -118,7 +115,7 @@ public class Lexer{
     }
 
     private boolean isWhitespace(char c) {
-        return c == ' ' || c == '\t' || c == '\r';
+        return c == ' ' || c == '\t' || c == '\r' || c == '\n';
     }
 
     private char advance(){
@@ -137,17 +134,14 @@ public class Lexer{
     }
 
     private void skipUnrelevant(){
-        //System.out.println("Skip unrelevant.");
         char c = reader.peek();
         while (skipWhitespace(c) || skipComment(c)) {
             getLexeme();
             c = reader.peek();
         }
-        //System.out.println("END Skip unrelevant.");
     }
 
     private boolean skipWhitespace(char c){
-        //System.out.println("Skip whitespaces.");
         if (isWhitespace(c)) {
             advance();
             return true;
@@ -156,34 +150,31 @@ public class Lexer{
     }
 
     private boolean skipComment(char c){
-        //System.out.println("Skip comment.");
-        //System.out.println("c: " + c);
         if (c == '#') {
-            while (reader.peek() != '\n' && !isEOF()) advance();
-            System.out.println("true");
+            while (reader.peek() != '\n' && reader.peek() != EOF) advance();
             return true;
         }
         return false;
     }
 
-    private Token number(){
-        while (isDigit(reader.peek())) {
-            System.out.println("peek: " + reader.peek());
+    private Token number() {
+        char c = '\0';
+        
+        while(isDigit(reader.peek())){
             advance();
         }
-        if (reader.peek() == '%' && isDigit(reader.peek())) {
-            System.out.println("peek: " + reader.peek());
+        if(reader.peek() == '%')
+            c = advance();       
+        if (c == '%' && isDigit(reader.peek())) {
             advance();
             while (isDigit(reader.peek())) {
-                System.out.println("peek: " + reader.peek());
                 advance();
             }
         }
-        return setToken(TokenType.NUMBER, lexeme);
+        return setToken(TokenType.NUMBER);
     }
 
     private Token identifier(){
-        int length = 0;
         while (isAlphaNumeric(reader.peek())) {
             advance();
         }
@@ -198,17 +189,18 @@ public class Lexer{
     }
 
     private Token string(){
-        int length = 0;
         while (reader.peek() != '"') {
             if (advance() == '\n' || reader.isEOF()) {
-                //return stringError();
             }
         }
         advance();
 
         String value = lexemeToString();
-        value = value.substring(1, value.length() - 1); // Remove "" marks
-        return setToken(TokenType.STRING, value);
+        lexeme.delete(0, lexeme.length());
+        lexeme.append(value.substring(1, value.length() - 1)); // Remove "" marks
+        reader.getPosition().decrementColumn();
+        reader.getPosition().decrementColumn();
+        return setToken(TokenType.STRING);
     }
 
     private String getLexeme() {
@@ -222,11 +214,6 @@ public class Lexer{
         return lexeme.toString();
     }
 
-
-    private boolean isEOF() {
-        return EOF;
-    }
-
     private int getColumn() {
         return reader.getPosition().column();
     }
@@ -235,7 +222,7 @@ public class Lexer{
         return reader.getPosition().line();
     }
 
-    private Token setToken(TokenType type, Object literal) {
+    private Token setToken(TokenType type) {
         String text = getLexeme();
         int line = getLine();
         int start_column = getColumn() - text.length() + 1;
@@ -243,9 +230,9 @@ public class Lexer{
         return new Token(type, text, line, start_column);
     }
 
-    private Token setToken(TokenType type) {
-        return setToken(type, null);
-    }
+//    private Token setToken(TokenType type) {
+//        return setToken(type, null);
+//    }
 
     public Lexer(CodeReader reader) {
         this.reader = reader;
@@ -253,7 +240,7 @@ public class Lexer{
     }
 
     private Token unexpCharError(char c) {
-        return setToken(TokenType.ERROR, String.format("'%s' - this guy shouldn't be there.", c));
+        return setToken(TokenType.ERROR);
     }
 
 }
