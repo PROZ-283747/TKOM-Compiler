@@ -3,10 +3,10 @@ package com.compiler.lexer;
 public enum TokenType {
 
     // Single character tokens
-    LEFT_PAREN,              //"{"
-    RIGHT_PAREN,             //"}"
-    LEFT_BRACKET,           //"("
-    RIGHT_BRACKET,          //")"
+    LEFT_PAREN,              //"("
+    RIGHT_PAREN,             //")"
+    LEFT_BRACKET,           //"{"
+    RIGHT_BRACKET,          //"}"
     LEFT_SQUARE_BRACKET,    //"["
     RIGHT_SQUARE_BRACKET,   //"]"
     COMMA,                  //","
@@ -15,7 +15,6 @@ public enum TokenType {
     APOSTROPHE,             //"'"
     SLASH,                  //"/"
     STAR,                   //"*"
-    HASH,                   //"#"
 
     // One or two characters tokens
     PLUS,               //"+"
@@ -24,6 +23,7 @@ public enum TokenType {
     DECREMENTATION,     //"--"
     MINUS_EQUAL,        //"-="
     PLUS_EQUAL,         //"+="
+    BANG,               //!
     BANG_EQUAL,         //"!="
     ASSIGNMENT,         //"="
     EQUAL,              //"=="
@@ -43,14 +43,18 @@ public enum TokenType {
     IF,                 // "if"
     WHILE,              // "while"
     RETURN,             // "return"
+    CLASS,              // "class"
+    FALSE,              // "false"
+    TRUE,               // "true"
+    PRINT,              // "print"
 
     // Literals
     IDENTIFIER,         // eg. "myVariable"
     STRING,             // eg. "'Example of string'"
-    NUMBER,             // eg. 5%7, 18%1, 45
+    FRACTION,             // eg. 5%7, 18%1, 45
 
     // End of file
-    END_OF_FILE,        // EOF
+    EOF,                 // EOF
 
     // When error
     ERROR               // sth incorrect

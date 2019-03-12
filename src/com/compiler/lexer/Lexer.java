@@ -10,17 +10,18 @@ import static sun.nio.ch.IOStatus.EOF;
 public class Lexer{
 
     private CodeReader reader;
-    public Token lastToken; // last created token
     private StringBuilder lexeme;
+    public Token lastToken; // last created token
+    int tokenColumn;
 
     private static final Map<String, TokenType> keywords;
-    private static final Map<String, TokenType> singleSigns;
+    //private static final Map<String, TokenType> singleSigns;
 
     private final Map<Character, Supplier<Token>> functions;
 
     static{
         keywords = new HashMap<>();
-        singleSigns = new HashMap<>();
+        //singleSigns = new HashMap<>();
 
         keywords.put("fraction", TokenType.FRACTION_T);
         keywords.put("string", TokenType.STRING_T);
@@ -30,28 +31,30 @@ public class Lexer{
         keywords.put("if", TokenType.IF);
         keywords.put("while", TokenType.WHILE);
         keywords.put("return", TokenType.RETURN);
+        keywords.put("class", TokenType.CLASS);
+        keywords.put("print", TokenType.PRINT);
 
-        singleSigns.put("{", TokenType.LEFT_PAREN);
-        singleSigns.put("}", TokenType.RIGHT_PAREN);
-        keywords.put("(", TokenType.LEFT_BRACKET);
-        keywords.put(")", TokenType.RIGHT_BRACKET);
-        keywords.put("[", TokenType.LEFT_SQUARE_BRACKET);
-        keywords.put("]", TokenType.RIGHT_SQUARE_BRACKET);
-        keywords.put(",", TokenType.COMMA);
-        keywords.put(":", TokenType.COLON);
-        keywords.put(";", TokenType.SEMICOLON);
-        keywords.put("\'", TokenType.APOSTROPHE);
-        keywords.put("/", TokenType.SLASH);
-        keywords.put("*", TokenType.STAR);
+//        singleSigns.put("(", TokenType.LEFT_PAREN);
+//        singleSigns.put(")", TokenType.RIGHT_PAREN);
+//        singleSigns.put("{", TokenType.LEFT_BRACKET);
+//        singleSigns.put("}", TokenType.RIGHT_BRACKET);
+//        singleSigns.put("[", TokenType.LEFT_SQUARE_BRACKET);
+//        singleSigns.put("]", TokenType.RIGHT_SQUARE_BRACKET);
+//        singleSigns.put(",", TokenType.COMMA);
+//        singleSigns.put(":", TokenType.COLON);
+//        singleSigns.put(";", TokenType.SEMICOLON);
+//        singleSigns.put("\'", TokenType.APOSTROPHE);
+//        singleSigns.put("/", TokenType.SLASH);
+//        singleSigns.put("*", TokenType.STAR);
     }
 
     {
         functions = new HashMap<>();
 
-        functions.put('{', () -> setToken(TokenType.LEFT_PAREN));
-        functions.put('}', () -> setToken(TokenType.RIGHT_PAREN));
-        functions.put('(', () -> setToken(TokenType.LEFT_BRACKET));
-        functions.put(')', () -> setToken(TokenType.RIGHT_BRACKET));
+        functions.put('(', () -> setToken(TokenType.LEFT_PAREN));
+        functions.put(')', () -> setToken(TokenType.RIGHT_PAREN));
+        functions.put('{', () -> setToken(TokenType.LEFT_BRACKET));
+        functions.put('}', () -> setToken(TokenType.RIGHT_BRACKET));
         functions.put('[', () -> setToken(TokenType.LEFT_SQUARE_BRACKET));
         functions.put(']', () -> setToken(TokenType.RIGHT_SQUARE_BRACKET));
         functions.put(',', () -> setToken(TokenType.COMMA));
@@ -61,6 +64,7 @@ public class Lexer{
         functions.put('/', () -> setToken(TokenType.SLASH));
         functions.put('*', () -> setToken(TokenType.STAR));
 
+        // todo: funkcja do + += ++
         functions.put('+', () -> setToken(expect('=') ? TokenType.PLUS : TokenType.PLUS_EQUAL));
         functions.put('+', () -> setToken(expect('+') ? TokenType.PLUS : TokenType.INCREMENTATION));
         functions.put('-', () -> setToken(expect('=') ? TokenType.MINUS : TokenType.MINUS_EQUAL));
@@ -68,9 +72,9 @@ public class Lexer{
         functions.put('=', () -> setToken(expect('=') ? TokenType.ASSIGNMENT : TokenType.EQUAL));
         functions.put('>', () -> setToken(expect('=') ? TokenType.GREATER : TokenType.GREATER_EQUAL));
         functions.put('<', () -> setToken(expect('=') ? TokenType.LESS : TokenType.LESS_EQUAL));
-        functions.put('!', () -> setToken(expect('=') ? TokenType.ERROR : TokenType.BANG_EQUAL));
-        functions.put('&', () -> setToken(expect('&') ? TokenType.ERROR : TokenType.AND));
-        functions.put('|', () -> setToken(expect('|') ? TokenType.ERROR : TokenType.OR));
+        functions.put('!', () -> setToken(expect('=') ? TokenType.BANG_EQUAL : TokenType.BANG));
+        functions.put('&', () -> setToken(expect('&') ? TokenType.AND : TokenType.ERROR));
+        functions.put('|', () -> setToken(expect('|') ? TokenType.OR : TokenType.ERROR));
 
         functions.put('"', this::string);
 
@@ -90,11 +94,13 @@ public class Lexer{
 
     public Token getToken() {
         skipUnrelevant();
-        
+
         char c = advance();
+
+        tokenColumn = reader.getPosition().column();
         
         if(c == EOF || c == (char) -1 || c == (char) 0x04){
-            return new Token(TokenType.END_OF_FILE, "", getLine(), getColumn());
+            return new Token(TokenType.EOF, "", getLine(), getColumn(), getSignNumber());
         }
         Token token = functions.getOrDefault(c, () -> unexpCharError(c)).get();
 
@@ -171,7 +177,7 @@ public class Lexer{
                 advance();
             }
         }
-        return setToken(TokenType.NUMBER);
+        return setToken(TokenType.FRACTION);
     }
 
     private Token identifier(){
@@ -198,8 +204,7 @@ public class Lexer{
         String value = lexemeToString();
         lexeme.delete(0, lexeme.length());
         lexeme.append(value.substring(1, value.length() - 1)); // Remove "" marks
-        reader.getPosition().decrementColumn();
-        reader.getPosition().decrementColumn();
+
         return setToken(TokenType.STRING);
     }
 
@@ -222,17 +227,17 @@ public class Lexer{
         return reader.getPosition().line();
     }
 
+    private int getSignNumber(){
+        return reader.getPosition().signNumber();
+    }
+
     private Token setToken(TokenType type) {
         String text = getLexeme();
         int line = getLine();
-        int start_column = getColumn() - text.length() + 1;
+        int signNumber = getSignNumber();
 
-        return new Token(type, text, line, start_column);
+        return new Token(type, text, line, tokenColumn, signNumber);
     }
-
-//    private Token setToken(TokenType type) {
-//        return setToken(type, null);
-//    }
 
     public Lexer(CodeReader reader) {
         this.reader = reader;

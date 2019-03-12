@@ -4,26 +4,26 @@ import java.io.*;
 
 public class CodeReader implements Source{
 
-    private final Position currentPos; // Position of recently read char
+    private final Position currentPos; // Position of recently read token
     private File file;
     private BufferedReader reader;
     private final boolean EOF = false;
     private char currChar = '\0'; // next sign to read and process
 
     public CodeReader(Reader reader) {
-        currentPos = new Position(1, 0);
+        currentPos = new Position(1, 0, 0);
         this.reader = new BufferedReader(reader);
     }
 
     public CodeReader(String fileName) throws IOException {
-        currentPos = new Position(1, 0);
+        currentPos = new Position(1, 0, 0);
         try {
             file = new File(fileName);
             reader = new BufferedReader(new FileReader(file));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        currChar = (char)reader.read();   // TODO: is this correct ?
+        currChar = (char)reader.read();
     }
 
     @Override
@@ -45,6 +45,7 @@ public class CodeReader implements Source{
         }
         currentPos.incrementColumn();
 
+        currentPos.incrementSignNumber();
         char c = currChar;
 
         try {

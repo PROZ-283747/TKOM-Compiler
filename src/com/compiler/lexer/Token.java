@@ -1,27 +1,31 @@
 package com.compiler.lexer;
 
 import com.compiler.Fraction;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Optional;
 
+
+
 public class Token {
 
-    final TokenType type;
+    public final TokenType type;
     final String lexeme;
-    final Optional<Fraction> fraction = null;
+    Optional<Fraction> fraction = null;
     private final int column;
     private final int line;
+    private final int signNumber;
 
 
-    Token(TokenType type, String lexeme, int line, int column) {
+    Token(TokenType type, String lexeme, int line, int column, int signNumber) {
         this.type = type;
         this.lexeme = lexeme;
         this.line = line;
         this.column = column;
-        if(type==TokenType.NUMBER){
-            //TODO set fraction using lexeme
+        this.signNumber = signNumber;
+        if(type==TokenType.FRACTION){
             Fraction f = new Fraction(lexeme);
-            //fraction = f;
+            this.fraction = Optional.of(f);
         }
     }
 
@@ -44,7 +48,21 @@ public class Token {
     public int getLine() {
         return line;
     }
+
+    public int getSignNumber(){
+        return signNumber;
+    }
+
+    // osobna klasa prezenter do ywswietlania
     public String toString() {
-        return "type: " + type + " \"" + lexeme + "\"" + " line: " + line +" column: " + column;
+        return "type: " + type + " \"" + lexeme + "\"" + " line: " + line +" column: " + column + " signNumber: " + signNumber ;
+    }
+
+    public static Object tokenConverter(Token token) {
+        if(token.type == TokenType.FRACTION) return new Fraction(token.lexeme);
+        if(token.type == TokenType.STRING) return token.lexeme;
+
+        throw new NotImplementedException();
     }
 }
+

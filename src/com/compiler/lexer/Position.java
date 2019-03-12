@@ -1,13 +1,16 @@
 package com.compiler.lexer;
 
+
 public class Position {
 
     private int line;
     private int column;
+    private int signNumber;
 
-    public Position(int line, int column) {
+    public Position(int line, int column, int num) {
         this.line = line;
         this.column = column;
+        this.signNumber = num;
     }
 
     public int column() {
@@ -42,8 +45,28 @@ public class Position {
         this.line = line;
     }
 
+    public int signNumber(){
+        return getSignNumber();
+    }
+
+    public int getSignNumber() {
+        return signNumber;
+    }
+
+    public void setSignNumber(int num) {
+        this.signNumber = num;
+    }
+
     public void incrementLine() {
         this.line++;
+    }
+
+    public void incrementSignNumber(){
+        this.signNumber++;
+    }
+
+    public void decrementSignNumber(){
+        this.signNumber--;
     }
 
 }
