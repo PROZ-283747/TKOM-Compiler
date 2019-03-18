@@ -2,11 +2,12 @@ package com.compiler.parser;
 
 
 import com.compiler.lexer.Token;
+import javafx.util.Pair;
 
 import java.util.List;
 
 
-abstract class Statement {
+public abstract class Statement {
     interface Visitor<R> {
         R visitBlockStmt(Block stmt);
         R visitClassStmt(Class stmt);
@@ -17,6 +18,8 @@ abstract class Statement {
         R visitReturnStmt(Return stmt);
         R visitVarStmt(Var stmt);
         R visitWhileStmt(While stmt);
+        R visitForStmt(For stmt);
+        R visitContainerStmt(Container stmt);
     }
     static class Block extends Statement {
         Block(List<Statement> statements) {
@@ -30,10 +33,10 @@ abstract class Statement {
         final List<Statement> statements;
     }
     static class Class extends Statement {
-        Class(Token name, com.compiler.parser.Expression superclass, List<Statement.Function> methods) {
+        Class(Token name, com.compiler.parser.Expression superclass, List<Statement> body) {
             this.name = name;
             this.superclass = superclass;
-            this.methods = methods;
+            this.body = body;
         }
 
         <R> R accept(Visitor<R> visitor) {
@@ -42,8 +45,9 @@ abstract class Statement {
 
         final Token name;
         final com.compiler.parser.Expression superclass;
-        final List<Statement.Function> methods;
+        final List<Statement> body;
     }
+
     static class Expression extends Statement {
         Expression(com.compiler.parser.Expression expression) {
             this.expression = expression;
@@ -55,9 +59,11 @@ abstract class Statement {
 
         final com.compiler.parser.Expression expression;
     }
+
     static class Function extends Statement {
-        Function(Token name, List<Token> parameters, List<Statement> body) {
+        Function(Token name, Token type, List<Pair<Token, Token>> parameters, List<Statement> body) {
             this.name = name;
+            this.type = type;
             this.parameters = parameters;
             this.body = body;
         }
@@ -67,11 +73,12 @@ abstract class Statement {
         }
 
         final Token name;
-        final List<Token> parameters;
+        final Token type;
+        final List<Pair<Token, Token>> parameters;
         final List<Statement> body;
     }
     static class If extends Statement {
-        If(com.compiler.parser.Expression condition, Statement thenBranch, Statement elseBranch) {
+        If(com.compiler.parser.Expression condition, List<Statement> thenBranch, List<Statement> elseBranch) {
             this.condition = condition;
             this.thenBranch = thenBranch;
             this.elseBranch = elseBranch;
@@ -82,8 +89,8 @@ abstract class Statement {
         }
 
         final com.compiler.parser.Expression condition;
-        final Statement thenBranch;
-        final Statement elseBranch;
+        final List<Statement> thenBranch;
+        final List<Statement> elseBranch;
     }
     static class Print extends Statement {
         Print(com.compiler.parser.Expression expression) {
@@ -109,8 +116,10 @@ abstract class Statement {
         final Token keyword;
         final com.compiler.parser.Expression value;
     }
-    static class Var extends Statement {
-        Var(Token name, com.compiler.parser.Expression initializer) {
+
+    public static class Var extends Statement {
+        Var(Token type, Token name, com.compiler.parser.Expression initializer) {
+            this.type = type;
             this.name = name;
             this.initializer = initializer;
         }
@@ -119,9 +128,27 @@ abstract class Statement {
             return visitor.visitVarStmt(this);
         }
 
+        final Token type;
         final Token name;
-        final com.compiler.parser.Expression initializer;
+        public final com.compiler.parser.Expression initializer;
     }
+
+    static class Container extends Statement {
+        Container(Token type, Token name, List<com.compiler.parser.Expression> elements) {
+            this.type = type;
+            this.name = name;
+            this.elements = elements;
+        }
+
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitContainerStmt(this);
+        }
+
+        final Token type;
+        final Token name;
+        final List<com.compiler.parser.Expression> elements;
+    }
+
     static class While extends Statement {
         While(com.compiler.parser.Expression condition, Statement body) {
             this.condition = condition;
@@ -133,6 +160,24 @@ abstract class Statement {
         }
 
         final com.compiler.parser.Expression condition;
+        final Statement body;
+    }
+
+    static class For extends Statement {
+        For(Token type, Token iter, Token container, Statement body) {
+            this.type = type;
+            this.iter = iter;
+            this.container = container;
+            this.body = body;
+        }
+
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitForStmt(this);
+        }
+
+        final Token type;
+        final Token iter;
+        final Token container;
         final Statement body;
     }
 

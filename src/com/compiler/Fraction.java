@@ -12,12 +12,18 @@ public class Fraction {
         }
         nominator = nomin;
         denominator = denomin;
+
     };
 
     public Fraction(String value){
         int nomin = 0;
         int denomin = 0;
         int index = value.indexOf("%");
+        if(value.isEmpty()){
+            nominator = 0;
+            denominator = 1;
+            return;
+        }
         if(index == -1) {
             nomin = Integer.parseInt(value);
             denomin = 1;
@@ -26,7 +32,13 @@ public class Fraction {
             nomin = Integer.parseInt(value.substring(0, index));
             denomin = Integer.parseInt(value.substring(index+1, value.length()));
         }
-        new Fraction(nomin, denomin);
+        if(denomin == 0){
+            System.err.println("ERROR: It's  impossible to create fraction. Donominator cannot be 0 !");
+            System.exit(-1);
+        }
+        nominator = nomin;
+        denominator = denomin;
+        System.out.println("FRACTION: nomin: " + nominator + " denomin: " + denominator );
     };
 
     void setNominator(int nomin){

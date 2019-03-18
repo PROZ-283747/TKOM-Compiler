@@ -11,13 +11,13 @@ public class Token {
 
     public final TokenType type;
     final String lexeme;
-    Optional<Fraction> fraction = null;
+    Fraction fraction = null;
     private final int column;
     private final int line;
     private final int signNumber;
 
 
-    Token(TokenType type, String lexeme, int line, int column, int signNumber) {
+    public Token(TokenType type, String lexeme, int line, int column, int signNumber) {
         this.type = type;
         this.lexeme = lexeme;
         this.line = line;
@@ -25,7 +25,7 @@ public class Token {
         this.signNumber = signNumber;
         if(type==TokenType.FRACTION){
             Fraction f = new Fraction(lexeme);
-            this.fraction = Optional.of(f);
+            this.fraction = f;
         }
     }
 
@@ -38,7 +38,7 @@ public class Token {
     }
 
     public Optional<Fraction> getFraction() {
-        return fraction;
+        return Optional.of(fraction);
     }
 
     public int getColumn() {

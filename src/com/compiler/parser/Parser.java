@@ -4,25 +4,32 @@ import com.compiler.Main;
 import com.compiler.lexer.MsgPrinter;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
+import javafx.util.Pair;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static com.compiler.lexer.TokenType.*;
 
-class Parser {
+// TODO list:
+// obsluzyć kontener: nazwa[size]
+// chyba źle wychodzi z bloku, bo nie ogarnia main() jako funkcje
+// sum = sum + i; zamiast plusa chce już średnik
+//
+//
+
+public class Parser {
     private static class ParseError extends RuntimeException {}
 
     private final List<Token> tokens;
     private int current = 0;
 
-    Parser(List<Token> tokens) {
+    public Parser(List<Token> tokens) {
         this.tokens = tokens;
     }
 
-    List<Statement> parse() {
+    public List<Statement> parse() {
         List<Statement> statements = new ArrayList<>();
         while (!isAtEnd()) {
             statements.add(declaration());
@@ -44,28 +51,41 @@ class Parser {
     }
 
     private Statement classDeclaration() {
+        System.out.println("CLASS");
         Token name = consume(IDENTIFIER, "Expect class name.");
 
         Expression superclass = null;
-        if (match(LESS)) {
+        if (match(COLON)) {
             consume(IDENTIFIER, "Expect superclass name.");
             superclass = new Expression.Variable(previous());
         }
 
         consume(LEFT_BRACKET, "Expect '{' before class body.");
 
-        List<Statement.Function> methods = new ArrayList<>();
+        List<Statement> body = new ArrayList<>();
         while (!check(RIGHT_BRACKET) && !isAtEnd()) {
-            methods.add(function("method"));
+            body = block();
         }
 
         consume(RIGHT_BRACKET, "Expect '}' after class body.");
 
-        return new Statement.Class(name, superclass, methods);
+        return new Statement.Class(name, superclass, body);
     }
 
     private Statement funcOrVar(){
-        throw new NotImplementedException();
+        Token type = previous();
+        System.out.println("Func or var here.");
+        Token name = consume(IDENTIFIER, "Expect function's or variable's name.");
+        System.out.println(name.getLexeme());
+        if(match(LEFT_PAREN)){
+            return function("function", type, name);
+        }
+        else if(match(LEFT_SQUARE_BRACKET)){
+            return containerDefinition(type, name);
+        }
+        else{
+            return varDeclaration(type, name);
+        }
     }
 
     private Statement statement() {
@@ -78,61 +98,44 @@ class Parser {
         return expressionStatement();
     }
 
+    // todo: zmienić
     private Statement forStatement() {
         consume(LEFT_PAREN, "Expect '(' after 'for'.");
 
-        Statement initializer;
-        if (match(SEMICOLON)) {
-            initializer = null;
-        } else if (match(VAR)) {
-            initializer = varDeclaration();
-        } else {
-            initializer = expressionStatement();
-        }
+        Token type = null;
+        Token iterName = null;
+        Token container = null;
 
-        Expression condition = null;
-        if (!check(SEMICOLON)) {
-            condition = expression();
-        }
-        consume(SEMICOLON, "Expect ';' after loop condition.");
-
-        Expression increment = null;
-        if (!check(RIGHT_PAREN)) {
-            increment = expression();
+        if(match(FRACTION_T, STRING_T)){
+            type = previous();
+            iterName = consume(IDENTIFIER, "Expect name of iterator through for loop");
+            consume(COLON, "Expect ':' in a for loop condition.");
+            container = consume(IDENTIFIER, "Expect name of container to iterate on.");
         }
         consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
         Statement body = statement();
 
-        if (increment != null) {
-            body = new Statement.Block(Arrays.asList(
-                    body,
-                    new Statement.Expression(increment)));
-        }
-
-        if (condition == null) condition = new Expression.Literal(true);
-        body = new Statement.While(condition, body);
-
-        if (initializer != null) {
-            body = new Statement.Block(Arrays.asList(initializer, body));
-        }
-
-        return body;
+        return new Statement.For(type, iterName, container, body);
     }
 
-    // todo: nowa funkcja wspolna dla funkcji i zmiennych. zjada typ i identifier a potem sprawdza czy jest '(' czy nie
-    private Statement.Function function(String kind) {
-        Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
-
-        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
-        List<Token> parameters = new ArrayList<>();
+    private Statement.Function function(String kind, Token type, Token name) {
+        System.out.println("FUNCTION: " + name);
+        List<Pair<Token, Token>> parameters = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
             do {
                 if (parameters.size() >= 20) {
                     error(peek(), "Cannot have more than 20 parameters.");
                 }
-                // todo: dodac typ
-                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+
+                if(match(STRING_T, VOID_T, FRACTION_T)){
+                    Token argType = previous();
+                    Token argName = consume(IDENTIFIER, "Expect parameter name.");
+                    parameters.add(new Pair<>(argType, argName));
+                }
+                else{
+                    error(previous(), "Expect argument's type.");
+                }
             } while (match(COMMA));
         }
         consume(RIGHT_PAREN, "Expect ')' after parameters.");
@@ -140,21 +143,25 @@ class Parser {
         consume(LEFT_BRACKET, "Expect '{' before " + kind + " body.");
         List<Statement> body = block();
 
-        return new Statement.Function(name, parameters, body);
+        return new Statement.Function(name, type, parameters, body);
     }
 
     private Statement ifStatement() {
+        System.out.println("IF");
         consume(LEFT_PAREN, "Expect '(' after 'if'.");
         Expression condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after if condition.");
-        // todo: dodać blok ifa z klamrami !!!
-        Statement thenBranch = statement();
-        Statement elseBranch = null;
+
+        consume(LEFT_BRACKET, "Expect '{' after if condition.");
+        List<Statement> bodyBranch = block();
+
+        List<Statement> elseBranch = null;
         if (match(ELSE)) {
-            elseBranch = statement();
+            consume(LEFT_BRACKET, "Expect '{' after if condition.");
+            elseBranch = block();
         }
 
-        return new Statement.If(condition, thenBranch, elseBranch);
+        return new Statement.If(condition, bodyBranch, elseBranch);
     }
 
     private Statement printStatement() {
@@ -185,12 +192,11 @@ class Parser {
             statements.add(declaration());
         }
 
-        consume(RIGHT_BRACKET, "Expect '}' after block.");
+        System.out.println("BLOCK: " + consume(RIGHT_BRACKET, "Expect '}' after block.")); //TODO: usun printa zostaw zawartość
         return statements;
     }
 
-    private Statement varDeclaration() {
-        Token name = consume(IDENTIFIER, "Expect variable name.");
+    private Statement varDeclaration(Token type, Token name) {
 
         Expression initializer = null;
         if (match(EQUAL)) {
@@ -198,7 +204,28 @@ class Parser {
         }
 
         consume(SEMICOLON, "Expect ';' after variable declaration.");
-        return new Statement.Var(name, initializer);
+
+        return new Statement.Var(type, name, initializer);
+    }
+
+    private Statement containerDefinition(Token type, Token name) {
+
+            consume(RIGHT_SQUARE_BRACKET, "Expect right square bracket.");
+            consume(EQUAL, "Expect right square bracket.");
+            consume(LEFT_BRACKET, "Expect left bracket in container initialization list.");
+
+            List<Expression> containerElements = new ArrayList<>();
+            if (!check(RIGHT_BRACKET)) {
+                do {
+                    if (containerElements.size() >= 20) {
+                        error(peek(), "Container cannot have more than 20 elements");
+                    }
+                    containerElements.add(expression());
+                } while (match(COMMA));
+            }
+            consume(RIGHT_BRACKET, "Expect right bracket in container initialization list.");
+            consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new Statement.Container(type, name, containerElements);
     }
 
     private Statement whileStatement() {
@@ -207,7 +234,6 @@ class Parser {
         consume(RIGHT_PAREN, "Expect ')' after condition.");
         Statement body = statement();
 
-        //return new Statement.While(condition, body);
         return new Statement.While(condition, body);
     }
 
@@ -231,10 +257,11 @@ class Parser {
             if (expr instanceof Expression.Variable) {
                 Token name = ((Expression.Variable)expr).name;
                 return new Expression.Assign(name, value);
-            } else if (expr instanceof Expression.Get) { // todo: usunac ??
-                Expression.Get get = (Expression.Get)expr;
-                return new Expression.Set(get.object, get.name, value);
             }
+// else if (expr instanceof Expression.Get) { // todo: usunac ??
+//                Expression.Get get = (Expression.Get)expr;
+//                return new Expression.Set(get.object, get.name, value);
+//            }
 
             error(equals, "Invalid assignment target.");
         }
@@ -269,7 +296,7 @@ class Parser {
     private Expression equality() {
         Expression expr = comparison();
 
-        while (match(BANG_EQUAL, EQUAL)) {
+        while (match(BANG_EQUAL, EQUAL_EQUAL)) {
             Token operator = previous();
             Expression right = comparison();
             expr = new Expression.Binary(expr, operator, right);
@@ -336,11 +363,10 @@ class Parser {
                 break;
             }
         }
-
         return expr;
     }
 
-    // prejadam argumenty
+    // przejadam argumenty
     private Expression finishCall(Expression callee) {
         List<Expression> arguments = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
@@ -418,7 +444,7 @@ class Parser {
     }
 
     private ParseError error(Token token, String message) {
-        MsgPrinter.error(token, message);
+        MsgPrinter.errorToken(token, message);
         return new ParseError();
     }
 

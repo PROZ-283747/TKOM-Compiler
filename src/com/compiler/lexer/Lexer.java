@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import static sun.nio.ch.IOStatus.EOF;
 
+//
 
 public class Lexer{
 
@@ -63,13 +64,10 @@ public class Lexer{
         functions.put('\'', () -> setToken(TokenType.APOSTROPHE));
         functions.put('/', () -> setToken(TokenType.SLASH));
         functions.put('*', () -> setToken(TokenType.STAR));
+        functions.put('+', () -> plusSign());
+        functions.put('-', () -> minusSign());
 
-        // todo: funkcja do + += ++
-        functions.put('+', () -> setToken(expect('=') ? TokenType.PLUS : TokenType.PLUS_EQUAL));
-        functions.put('+', () -> setToken(expect('+') ? TokenType.PLUS : TokenType.INCREMENTATION));
-        functions.put('-', () -> setToken(expect('=') ? TokenType.MINUS : TokenType.MINUS_EQUAL));
-        functions.put('-', () -> setToken(expect('-') ? TokenType.MINUS : TokenType.DECREMENTATION));
-        functions.put('=', () -> setToken(expect('=') ? TokenType.ASSIGNMENT : TokenType.EQUAL));
+        functions.put('=', () -> setToken(expect('=') ? TokenType.EQUAL_EQUAL: TokenType.EQUAL));
         functions.put('>', () -> setToken(expect('=') ? TokenType.GREATER : TokenType.GREATER_EQUAL));
         functions.put('<', () -> setToken(expect('=') ? TokenType.LESS : TokenType.LESS_EQUAL));
         functions.put('!', () -> setToken(expect('=') ? TokenType.BANG_EQUAL : TokenType.BANG));
@@ -90,6 +88,24 @@ public class Lexer{
         for (char c = 'A'; c <= 'Z'; c++) {
             functions.put(c, this::identifier);
         }
+    }
+
+    private Token plusSign(){
+        if(expect('='))
+            return setToken(TokenType.PLUS_EQUAL);
+        else if(expect('+'))
+            return setToken(TokenType.PLUS_PLUS);
+        else
+            return setToken(TokenType.PLUS);
+    }
+
+    private Token minusSign(){
+        if(expect('='))
+            return setToken(TokenType.MINUS_EQUAL);
+        else if(expect('-'))
+            return setToken(TokenType.MINUS_MINUS);
+        else
+            return setToken(TokenType.MINUS);
     }
 
     public Token getToken() {
@@ -180,6 +196,25 @@ public class Lexer{
         return setToken(TokenType.FRACTION);
     }
 
+    private boolean isFractionCorrect(String value){
+        int nomin = 0;
+        int denomin = 0;
+        int index = value.indexOf("%");
+
+        if(index == -1) {
+            nomin = Integer.parseInt(value);
+            denomin = 1;
+        }
+        else{
+            nomin = Integer.parseInt(value.substring(0, index));
+            denomin = Integer.parseInt(value.substring(index+1, value.length()));
+        }
+        if(denomin == 0){
+            System.err.println("ERROR: It's  impossible to create fraction. Donominator cannot be 0 !");
+            System.exit(-1);
+        }
+    }
+
     private Token identifier(){
         while (isAlphaNumeric(reader.peek())) {
             advance();
@@ -231,7 +266,7 @@ public class Lexer{
         return reader.getPosition().signNumber();
     }
 
-    private Token setToken(TokenType type) {
+    public Token setToken(TokenType type) {
         String text = getLexeme();
         int line = getLine();
         int signNumber = getSignNumber();

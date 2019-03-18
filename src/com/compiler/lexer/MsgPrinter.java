@@ -4,17 +4,25 @@ import java.io.IOException;
 
 public class MsgPrinter {
 
+    int lexerErrorCount = 0;
+    int parserErrorCount = 0;
+    int interpreterErrorCount = 0;
+
     public void printToken(Token token){
         System.out.println("type: " + token.getType() + " \"" + token.getLexeme() + "\"" + " line: " + token.getLine() +" column: " + token.getColumn() + " signNumber: " + token.getSignNumber() );
     }
 
     public static void printFinalErrorInfo(int errorCount){
-        System.err.println("You made " + errorCount + "error(s).");
+        System.err.println("You made " + errorCount + " error(s).");
     }
 
     public static void error(String msg, int line, int column, int signNumber, String path) {
         System.err.println(String.format("There is something wrong at line %d column %d: %s", line, column, msg));
         printLineWithError(path, line, column, signNumber);
+    }
+
+    public static void errorToken(Token token, String msg) {
+        System.err.println(String.format("There is inappropriate token in line %d column %d: %s", token.getLine(), token.getColumn(), msg));
     }
 
     public static void printLineWithError(String path, int line, int column, int signNumber){

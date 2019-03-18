@@ -18,15 +18,15 @@ public enum TokenType {
 
     // One or two characters tokens
     PLUS,               //"+"
-    INCREMENTATION,     //"++"
+    PLUS_PLUS,     //"++"
     MINUS,              //"-"
-    DECREMENTATION,     //"--"
+    MINUS_MINUS,        //"--"
     MINUS_EQUAL,        //"-="
     PLUS_EQUAL,         //"+="
     BANG,               //!
     BANG_EQUAL,         //"!="
-    ASSIGNMENT,         //"="
-    EQUAL,              //"=="
+    EQUAL,              //"="
+    EQUAL_EQUAL,        //"=="
     GREATER,            //">"
     GREATER_EQUAL,      //">="
     LESS,               //"<"
