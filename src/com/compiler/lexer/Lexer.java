@@ -1,28 +1,26 @@
 package com.compiler.lexer;
 
+import com.compiler.ErrorHandler;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-
 import static sun.nio.ch.IOStatus.EOF;
 
-//
 
 public class Lexer{
 
     private CodeReader reader;
     private StringBuilder lexeme;
+    private ErrorHandler errorHandler = new ErrorHandler();
     public Token lastToken; // last created token
     int tokenColumn;
 
     private static final Map<String, TokenType> keywords;
-    //private static final Map<String, TokenType> singleSigns;
-
     private final Map<Character, Supplier<Token>> functions;
 
     static{
         keywords = new HashMap<>();
-        //singleSigns = new HashMap<>();
 
         keywords.put("fraction", TokenType.FRACTION_T);
         keywords.put("string", TokenType.STRING_T);
@@ -34,19 +32,6 @@ public class Lexer{
         keywords.put("return", TokenType.RETURN);
         keywords.put("class", TokenType.CLASS);
         keywords.put("print", TokenType.PRINT);
-
-//        singleSigns.put("(", TokenType.LEFT_PAREN);
-//        singleSigns.put(")", TokenType.RIGHT_PAREN);
-//        singleSigns.put("{", TokenType.LEFT_BRACKET);
-//        singleSigns.put("}", TokenType.RIGHT_BRACKET);
-//        singleSigns.put("[", TokenType.LEFT_SQUARE_BRACKET);
-//        singleSigns.put("]", TokenType.RIGHT_SQUARE_BRACKET);
-//        singleSigns.put(",", TokenType.COMMA);
-//        singleSigns.put(":", TokenType.COLON);
-//        singleSigns.put(";", TokenType.SEMICOLON);
-//        singleSigns.put("\'", TokenType.APOSTROPHE);
-//        singleSigns.put("/", TokenType.SLASH);
-//        singleSigns.put("*", TokenType.STAR);
     }
 
     {
@@ -193,6 +178,7 @@ public class Lexer{
                 advance();
             }
         }
+        isFractionCorrect(String.valueOf(lexeme));
         return setToken(TokenType.FRACTION);
     }
 
@@ -210,9 +196,11 @@ public class Lexer{
             denomin = Integer.parseInt(value.substring(index+1, value.length()));
         }
         if(denomin == 0){
-            System.err.println("ERROR: It's  impossible to create fraction. Donominator cannot be 0 !");
+            Token token = unexpCharError(reader.peek());
+            errorHandler.printLexerError("ERROR: It's  impossible to create fraction. Denominator cannot be 0 !", token,null);
             System.exit(-1);
         }
+        return true;
     }
 
     private Token identifier(){

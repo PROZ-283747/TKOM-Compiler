@@ -1,23 +1,15 @@
 package com.compiler.parser;
 
-import com.compiler.Main;
-import com.compiler.lexer.MsgPrinter;
+import com.compiler.ErrorHandler;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
 import javafx.util.Pair;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.compiler.lexer.TokenType.*;
 
-// TODO list:
-// obsluzyć kontener: nazwa[size]
-// chyba źle wychodzi z bloku, bo nie ogarnia main() jako funkcje
-// sum = sum + i; zamiast plusa chce już średnik
-//
-//
 
 public class Parser {
     private static class ParseError extends RuntimeException {}
@@ -51,7 +43,6 @@ public class Parser {
     }
 
     private Statement classDeclaration() {
-        System.out.println("CLASS");
         Token name = consume(IDENTIFIER, "Expect class name.");
 
         Expression superclass = null;
@@ -67,16 +58,16 @@ public class Parser {
             body = block();
         }
 
-        consume(RIGHT_BRACKET, "Expect '}' after class body.");
+        // bo w block() jest przejadany '}'
+        //consume(RIGHT_BRACKET, "Expect '}' after class body.");
 
         return new Statement.Class(name, superclass, body);
     }
 
     private Statement funcOrVar(){
         Token type = previous();
-        System.out.println("Func or var here.");
         Token name = consume(IDENTIFIER, "Expect function's or variable's name.");
-        System.out.println(name.getLexeme());
+
         if(match(LEFT_PAREN)){
             return function("function", type, name);
         }
@@ -94,11 +85,11 @@ public class Parser {
         if (match(RETURN)) return returnStatement();
         if (match(WHILE)) return whileStatement();
         if (match(LEFT_BRACKET)) return new Statement.Block(block());
+        if (match(PRINT)) return printStatement();
 
         return expressionStatement();
     }
 
-    // todo: zmienić
     private Statement forStatement() {
         consume(LEFT_PAREN, "Expect '(' after 'for'.");
 
@@ -120,7 +111,6 @@ public class Parser {
     }
 
     private Statement.Function function(String kind, Token type, Token name) {
-        System.out.println("FUNCTION: " + name);
         List<Pair<Token, Token>> parameters = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
             do {
@@ -147,7 +137,6 @@ public class Parser {
     }
 
     private Statement ifStatement() {
-        System.out.println("IF");
         consume(LEFT_PAREN, "Expect '(' after 'if'.");
         Expression condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after if condition.");
@@ -192,7 +181,7 @@ public class Parser {
             statements.add(declaration());
         }
 
-        System.out.println("BLOCK: " + consume(RIGHT_BRACKET, "Expect '}' after block.")); //TODO: usun printa zostaw zawartość
+        consume(RIGHT_BRACKET, "Expect '}' after block.");
         return statements;
     }
 
@@ -258,10 +247,6 @@ public class Parser {
                 Token name = ((Expression.Variable)expr).name;
                 return new Expression.Assign(name, value);
             }
-// else if (expr instanceof Expression.Get) { // todo: usunac ??
-//                Expression.Get get = (Expression.Get)expr;
-//                return new Expression.Set(get.object, get.name, value);
-//            }
 
             error(equals, "Invalid assignment target.");
         }
@@ -356,13 +341,13 @@ public class Parser {
         Expression expr = primary();
 
         // todo: is while necessary ??
-        while (true) {
+        //while (true) {
             if (match(LEFT_PAREN)) {
                 expr = finishCall(expr);
-            } else {
-                break;
-            }
-        }
+            } //else {
+                //break;
+            //}
+        //}
         return expr;
     }
 
@@ -388,7 +373,7 @@ public class Parser {
         if (match(TRUE)) return new Expression.Literal(true);
 
         if (match(FRACTION, STRING)) {
-            return new Expression.Literal(Token.tokenConverter(previous()));
+            return new Expression.Literal(Token.tokenConverter(previous())); // returns Fraction or String
         }
 
         if (match(IDENTIFIER)) {
@@ -401,7 +386,7 @@ public class Parser {
             return new Expression.Grouping(expr);
         }
 
-        throw error(peek(), "Expect expression.");
+        throw error(peek(), "(in primary())Expect expression.");
     }
 
     private boolean match(TokenType... types) {
@@ -444,7 +429,7 @@ public class Parser {
     }
 
     private ParseError error(Token token, String message) {
-        MsgPrinter.errorToken(token, message);
+        ErrorHandler.printParserError(message, token);
         return new ParseError();
     }
 

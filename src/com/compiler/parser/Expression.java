@@ -10,27 +10,15 @@ public abstract class Expression {
 
     public interface Visitor<R> {
         R visitAssignExpr(Assign expr);
-
         R visitSetExpr(Set expr);
-
         R visitBinaryExpr(Binary expr);
-
         R visitCallExpr(Call expr);
-
         R visitGetExpr(Get expr);
-
-        R visitSubscriptionExpr(Subscription expr);
-
-        R visitPropertyRefExpr(PropertyRef expr);
-
+        R visitSuperExpr(Super expr);
         R visitGroupingExpr(Grouping expr);
-
         R visitLiteralExpr(Literal expr);
-
         R visitLogicalExpr(Logical expr);
-
         R visitUnaryExpr(Unary expr);
-
         R visitVariableExpr(Variable expr);
     }
 
@@ -94,35 +82,48 @@ public abstract class Expression {
         }
     }
 
-    public static class PropertyRef extends Expression {
-        public final Expression object;
-        public final Token name;
-
-        PropertyRef(Token name, Expression object) {
-            this.object = object;
-            this.name = name;
+    public static class Super extends Expression {
+        Super(Token keyword, Token method) {
+            this.keyword = keyword;
+            this.method = method;
         }
 
         public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitPropertyRefExpr(this);
+            return visitor.visitSuperExpr(this);
         }
+
+        public final Token keyword;
+        public final Token method;
     }
+//    public static class PropertyRef extends Expression {
+//        public final Expression object;
+//        public final Token name;
+//
+//        PropertyRef(Token name, Expression object) {
+//            this.object = object;
+//            this.name = name;
+//        }
+//
+//        public <R> R accept(Visitor<R> visitor) {
+//            return visitor.visitPropertyRefExpr(this);
+//        }
+//    }
 
-    public static class Subscription extends Expression {
-        public final Expression object;
-        public final Expression inside;
-        public final Token rightBracket;
-
-        Subscription(Expression object, Expression inside, Token rightBracket) {
-            this.object = object;
-            this.inside = inside;
-            this.rightBracket = rightBracket;
-        }
-
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitSubscriptionExpr(this);
-        }
-    }
+//    public static class Subscription extends Expression {
+//        public final Expression object;
+//        public final Expression inside;
+//        public final Token rightBracket;
+//
+//        Subscription(Expression object, Expression inside, Token rightBracket) {
+//            this.object = object;
+//            this.inside = inside;
+//            this.rightBracket = rightBracket;
+//        }
+//
+//        public <R> R accept(Visitor<R> visitor) {
+//            return visitor.visitSubscriptionExpr(this);
+//        }
+//    }
 
     public static class Grouping extends Expression {
         public final Expression expression;

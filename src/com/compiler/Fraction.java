@@ -7,7 +7,7 @@ public class Fraction {
 
     public Fraction(int nomin, int denomin){
         if(denomin == 0){
-            System.err.println("ERROR: It's  impossible to create fraction. Donominator cannot be 0 !");
+            System.err.println("ERROR: It's  impossible to create fraction. Denominator cannot be 0 !");
             System.exit(-1);
         }
         nominator = nomin;
@@ -16,8 +16,8 @@ public class Fraction {
     };
 
     public Fraction(String value){
-        int nomin = 0;
-        int denomin = 0;
+        int nomin;
+        int denomin;
         int index = value.indexOf("%");
         if(value.isEmpty()){
             nominator = 0;
@@ -33,12 +33,11 @@ public class Fraction {
             denomin = Integer.parseInt(value.substring(index+1, value.length()));
         }
         if(denomin == 0){
-            System.err.println("ERROR: It's  impossible to create fraction. Donominator cannot be 0 !");
+            System.err.println("ERROR: It's impossible to create fraction. Denominator cannot be 0 !");
             System.exit(-1);
         }
         nominator = nomin;
         denominator = denomin;
-        System.out.println("FRACTION: nomin: " + nominator + " denomin: " + denominator );
     };
 
     void setNominator(int nomin){

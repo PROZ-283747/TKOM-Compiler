@@ -2,15 +2,13 @@ package com.compiler.lexer;
 
 import com.compiler.Fraction;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.Optional;
-
 
 
 public class Token {
 
     public final TokenType type;
-    final String lexeme;
+    public final String lexeme;
     Fraction fraction = null;
     private final int column;
     private final int line;
@@ -23,10 +21,12 @@ public class Token {
         this.line = line;
         this.column = column;
         this.signNumber = signNumber;
-        if(type==TokenType.FRACTION){
-            Fraction f = new Fraction(lexeme);
-            this.fraction = f;
-        }
+
+        // todo: filling fraction class with value will be done in Interpreter
+//        if(type==TokenType.FRACTION){
+//            Fraction f = new Fraction(lexeme);
+//            this.fraction = f;
+//        }
     }
 
     public TokenType getType() {
@@ -53,16 +53,16 @@ public class Token {
         return signNumber;
     }
 
-    // osobna klasa prezenter do ywswietlania
     public String toString() {
         return "type: " + type + " \"" + lexeme + "\"" + " line: " + line +" column: " + column + " signNumber: " + signNumber ;
     }
 
+    // TODO: Konrad mówi ze zawsze string a Fraction klase przenieść do interpretera !
     public static Object tokenConverter(Token token) {
-        if(token.type == TokenType.FRACTION) return new Fraction(token.lexeme);
-        if(token.type == TokenType.STRING) return token.lexeme;
-
-        throw new NotImplementedException();
+        //if(token.type == TokenType.FRACTION) return new Fraction(token.lexeme);
+        //if(token.type == TokenType.STRING) return token.lexeme;
+        return token.lexeme;
+        //throw new NotImplementedException();
     }
 }
 
