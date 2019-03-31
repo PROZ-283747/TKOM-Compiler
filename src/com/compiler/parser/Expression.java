@@ -10,10 +10,8 @@ public abstract class Expression {
 
     public interface Visitor<R> {
         R visitAssignExpr(Assign expr);
-        R visitSetExpr(Set expr);
         R visitBinaryExpr(Binary expr);
         R visitCallExpr(Call expr);
-        R visitGetExpr(Get expr);
         R visitSuperExpr(Super expr);
         R visitGroupingExpr(Grouping expr);
         R visitLiteralExpr(Literal expr);
@@ -68,20 +66,6 @@ public abstract class Expression {
         }
     }
 
-    public static class Get extends Expression {
-        public final Expression object;
-        public final Token name;
-
-        Get(Expression object, Token name) {
-            this.object = object;
-            this.name = name;
-        }
-
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitGetExpr(this);
-        }
-    }
-
     public static class Super extends Expression {
         Super(Token keyword, Token method) {
             this.keyword = keyword;
@@ -95,35 +79,6 @@ public abstract class Expression {
         public final Token keyword;
         public final Token method;
     }
-//    public static class PropertyRef extends Expression {
-//        public final Expression object;
-//        public final Token name;
-//
-//        PropertyRef(Token name, Expression object) {
-//            this.object = object;
-//            this.name = name;
-//        }
-//
-//        public <R> R accept(Visitor<R> visitor) {
-//            return visitor.visitPropertyRefExpr(this);
-//        }
-//    }
-
-//    public static class Subscription extends Expression {
-//        public final Expression object;
-//        public final Expression inside;
-//        public final Token rightBracket;
-//
-//        Subscription(Expression object, Expression inside, Token rightBracket) {
-//            this.object = object;
-//            this.inside = inside;
-//            this.rightBracket = rightBracket;
-//        }
-//
-//        public <R> R accept(Visitor<R> visitor) {
-//            return visitor.visitSubscriptionExpr(this);
-//        }
-//    }
 
     public static class Grouping extends Expression {
         public final Expression expression;
@@ -191,20 +146,4 @@ public abstract class Expression {
         }
     }
 
-    public static class Set extends Expression {
-        public final Expression object;
-        public final Token name;
-        public final Expression value;
-
-        Set(Expression object, Token name, Expression value) {
-            this.object = object;
-            this.name = name;
-            this.value = value;
-        }
-
-        @Override
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitSetExpr(this);
-        }
-    }
 }

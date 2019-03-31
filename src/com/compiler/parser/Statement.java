@@ -45,7 +45,7 @@ public abstract class Statement {
 
         public final Token name;
         public final com.compiler.parser.Expression superclass;
-        final List<Statement> body;
+        public final List<Statement> body;
     }
 
     public static class Expression extends Statement {
@@ -61,9 +61,9 @@ public abstract class Statement {
     }
 
     public static class Function extends Statement {
-        Function(Token name, Token type, List<Pair<Token, Token>> parameters, List<Statement> body) {
+        Function(Token name, Token type, List<Statement.Var> parameters, List<Statement> body) {
             this.name = name;
-            this.type = type;
+            this.returnType = type;
             this.parameters = parameters;
             this.body = body;
         }
@@ -73,8 +73,9 @@ public abstract class Statement {
         }
 
         public final Token name;
-        final Token type;
-        public final List<Pair<Token, Token>> parameters;
+        public final Token returnType;
+        //public final List<Pair<Token, Token>> parameters;
+        public final List<Statement.Var> parameters;
         public final List<Statement> body;
     }
     public static class If extends Statement {
@@ -146,7 +147,7 @@ public abstract class Statement {
 
         final Token type;
         final Token name;
-        final List<com.compiler.parser.Expression> elements;
+        public final List<com.compiler.parser.Expression> elements;
     }
 
     public static class While extends Statement {
@@ -176,9 +177,10 @@ public abstract class Statement {
         }
 
         final Token type;
-        final Token iter;
-        final Token container;
-        final Statement body;
+        public final Token iter;
+        //public Statement.Container container;
+        public Token container;
+        public final Statement body;
     }
 
     public abstract <R> R accept(Visitor<R> visitor);

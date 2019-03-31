@@ -33,6 +33,7 @@ public class Main {
 
         ErrorHandler.stopIfError();
 
+        // todo:
         Parser parser = new Parser(tokens);
         List<Statement> statements = parser.parse();
 

@@ -1,9 +1,9 @@
 package com.compiler.interpreter.variables;
 
 public class Return extends RuntimeException {
-    final Object value;
+    final Variable value;
 
-    public Return(Object value) {
+    public Return(Variable value) {
         super(null, null, false, false);
         this.value = value;
     }

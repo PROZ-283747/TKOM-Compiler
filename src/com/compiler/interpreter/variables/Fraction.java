@@ -1,4 +1,4 @@
-package com.compiler;
+package com.compiler.interpreter.variables;
 
 public class Fraction {
 
@@ -98,5 +98,13 @@ public class Fraction {
 
     Fraction divide(Fraction first, Fraction second) {
         return reduceFraction(new Fraction(first.getNominator() * second.getDenominator(), first.getDenominator() * second.getNominator()));
+    }
+
+    boolean isEqual(Fraction first, Fraction second){
+        if(reduceFraction(first).getNominator() == reduceFraction(second).getNominator() &&
+                reduceFraction(first).getDenominator() == reduceFraction(second).getDenominator())
+            return true;
+
+        return false;
     }
 }

@@ -1,7 +1,7 @@
 package com.compiler.lexer;
 
-import com.compiler.Fraction;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import com.compiler.interpreter.variables.Fraction;
+
 import java.util.Optional;
 
 

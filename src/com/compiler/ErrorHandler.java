@@ -30,6 +30,11 @@ public class ErrorHandler {
         ++interpreterErrorCount;
     }
 
+    public static void printResolverError(String msg, int line, int column){
+        System.err.println(String.format("Error while resolving: " + msg + "Line: " + line + " Column: " + column));
+        //++resolverErrorCount;
+    }
+
     public static void printNoErrorMsg(){
         System.out.println("Perfect! There are no errors in your code. :) ");
     }

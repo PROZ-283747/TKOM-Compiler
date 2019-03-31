@@ -32,6 +32,7 @@ public class Lexer{
         keywords.put("return", TokenType.RETURN);
         keywords.put("class", TokenType.CLASS);
         keywords.put("print", TokenType.PRINT);
+        keywords.put("super", TokenType.SUPER);
     }
 
     {
@@ -49,6 +50,7 @@ public class Lexer{
         functions.put('\'', () -> setToken(TokenType.APOSTROPHE));
         functions.put('/', () -> setToken(TokenType.SLASH));
         functions.put('*', () -> setToken(TokenType.STAR));
+        functions.put('.', () -> setToken(TokenType.DOT));
         functions.put('+', () -> plusSign());
         functions.put('-', () -> minusSign());
 
@@ -106,6 +108,8 @@ public class Lexer{
         Token token = functions.getOrDefault(c, () -> unexpCharError(c)).get();
 
         lexeme.delete(0,lexeme.length());
+
+        lastToken = token;
         return token;
     }
 

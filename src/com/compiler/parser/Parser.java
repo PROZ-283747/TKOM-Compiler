@@ -3,7 +3,6 @@ package com.compiler.parser;
 import com.compiler.ErrorHandler;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
-import javafx.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +22,14 @@ public class Parser {
 
     public List<Statement> parse() {
         List<Statement> statements = new ArrayList<>();
+
+        //todo: while((newDeclaration = declaration()) != null)
+//        Statement stmt = declaration();
+//        while(stmt != null && !isAtEnd()){
+//            System.out.println("Statement: " + stmt);
+//            statements.add(stmt);
+//            stmt = declaration(); // todo: za ostatnim stmt isAtAnd ustawia się na true i nie dodaje sie statement.
+//        }
         while (!isAtEnd()) {
             statements.add(declaration());
         }
@@ -33,7 +40,7 @@ public class Parser {
     private Statement declaration() {
         try {
             if (match(CLASS)) return classDeclaration();
-            if (match(VOID_T, FRACTION_T, STRING_T)) return funcOrVar();
+            if (match(VOID_T, FRACTION_T, STRING_T)) return funcOrVarDeclaration();
 
             return statement();
         } catch (ParseError error) {
@@ -53,18 +60,12 @@ public class Parser {
 
         consume(LEFT_BRACKET, "Expect '{' before class body.");
 
-        List<Statement> body = new ArrayList<>();
-        while (!check(RIGHT_BRACKET) && !isAtEnd()) {
-            body = block();
-        }
-
-        // bo w block() jest przejadany '}'
-        //consume(RIGHT_BRACKET, "Expect '}' after class body.");
+        List<Statement> body = block();
 
         return new Statement.Class(name, superclass, body);
     }
 
-    private Statement funcOrVar(){
+    private Statement funcOrVarDeclaration(){
         Token type = previous();
         Token name = consume(IDENTIFIER, "Expect function's or variable's name.");
 
@@ -75,7 +76,7 @@ public class Parser {
             return containerDefinition(type, name);
         }
         else{
-            return varDeclaration(type, name);
+            return varDeclarationAndDefinition(type, name);
         }
     }
 
@@ -111,7 +112,7 @@ public class Parser {
     }
 
     private Statement.Function function(String kind, Token type, Token name) {
-        List<Pair<Token, Token>> parameters = new ArrayList<>();
+        List<Statement.Var> parameters = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
             do {
                 if (parameters.size() >= 20) {
@@ -121,7 +122,7 @@ public class Parser {
                 if(match(STRING_T, VOID_T, FRACTION_T)){
                     Token argType = previous();
                     Token argName = consume(IDENTIFIER, "Expect parameter name.");
-                    parameters.add(new Pair<>(argType, argName));
+                    parameters.add(varDeclaration(argType, argName));
                 }
                 else{
                     error(previous(), "Expect argument's type.");
@@ -185,8 +186,12 @@ public class Parser {
         return statements;
     }
 
-    private Statement varDeclaration(Token type, Token name) {
+    private Statement.Var varDeclaration(Token type, Token name) {
 
+        return new Statement.Var(type, name, null);
+    }
+
+    private Statement varDeclarationAndDefinition(Token type, Token name) {
         Expression initializer = null;
         if (match(EQUAL)) {
             initializer = expression();
@@ -340,18 +345,13 @@ public class Parser {
     private Expression call() {
         Expression expr = primary();
 
-        // todo: is while necessary ??
-        //while (true) {
-            if (match(LEFT_PAREN)) {
-                expr = finishCall(expr);
-            } //else {
-                //break;
-            //}
-        //}
+        if (match(LEFT_PAREN)) {
+            expr = finishCall(expr);
+        }
         return expr;
     }
 
-    // przejadam argumenty
+    // function call arguments
     private Expression finishCall(Expression callee) {
         List<Expression> arguments = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
@@ -359,6 +359,9 @@ public class Parser {
                 if (arguments.size() >= 20) {
                     error(peek(), "Cannot have more than 20 arguments.");
                 }
+//                Expression expr = expression();
+//                if(expr != null)
+//                    arguments.add(expr);
                 arguments.add(expression());
             } while (match(COMMA));
         }
@@ -374,6 +377,13 @@ public class Parser {
 
         if (match(FRACTION, STRING)) {
             return new Expression.Literal(Token.tokenConverter(previous())); // returns Fraction or String
+        }
+
+        if (match(SUPER)) {
+            Token keyword = previous();
+            consume(DOT, "Expect '.' after 'super'.");
+            Token method = consume(IDENTIFIER, "Expect superclass method name.");
+            return new Expression.Super(keyword, method);
         }
 
         if (match(IDENTIFIER)) {
@@ -396,7 +406,6 @@ public class Parser {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -447,7 +456,6 @@ public class Parser {
                 case RETURN:
                     return;
             }
-
             advance();
         }
     }

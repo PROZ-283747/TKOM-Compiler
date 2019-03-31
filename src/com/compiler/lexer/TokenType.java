@@ -15,10 +15,11 @@ public enum TokenType {
     APOSTROPHE,             //"'"
     SLASH,                  //"/"
     STAR,                   //"*"
+    DOT,                    //"."
 
     // One or two characters tokens
     PLUS,               //"+"
-    PLUS_PLUS,     //"++"
+    PLUS_PLUS,          //"++"
     MINUS,              //"-"
     MINUS_MINUS,        //"--"
     MINUS_EQUAL,        //"-="
@@ -47,6 +48,7 @@ public enum TokenType {
     FALSE,              // "false"
     TRUE,               // "true"
     PRINT,              // "print"
+    SUPER,              // "super"
 
     // Literals
     IDENTIFIER,         // eg. "myVariable"
