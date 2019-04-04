@@ -13,7 +13,8 @@ public class Lexer{
     private CodeReader reader;
     private StringBuilder lexeme;
     private ErrorHandler errorHandler = new ErrorHandler();
-    public Token lastToken; // last created token
+    public Token currentToken; // token to process next
+    public Token previousToken; // previous token
     int tokenColumn;
 
     private static final Map<String, TokenType> keywords;
@@ -95,22 +96,33 @@ public class Lexer{
             return setToken(TokenType.MINUS);
     }
 
-    public Token getToken() {
+    public void advanceToken() {
         skipUnrelevant();
-
         char c = advance();
 
         tokenColumn = reader.getPosition().column();
-        
-        if(c == EOF || c == (char) -1 || c == (char) 0x04){
-            return new Token(TokenType.EOF, "", getLine(), getColumn(), getSignNumber());
+        previousToken = currentToken;
+
+        if(c == (char) -1 || c == (char) 0x04){
+            currentToken = new Token(TokenType.EOF, "", getLine(), getColumn(), getSignNumber());
+            return;
         }
         Token token = functions.getOrDefault(c, () -> unexpCharError(c)).get();
-
         lexeme.delete(0,lexeme.length());
+        currentToken = token;
 
-        lastToken = token;
-        return token;
+        if(token.type == TokenType.ERROR) {
+            ErrorHandler.printLexerError("Invalid token.", token, null);
+            ErrorHandler.stopIfError();
+        }
+    }
+
+    public Token getCurrentToken() {
+        return currentToken;
+    }
+
+    public Token getPreviousToken() {
+        return previousToken;
     }
 
     private boolean isDigit(char c) {
@@ -269,6 +281,7 @@ public class Lexer{
     public Lexer(CodeReader reader) {
         this.reader = reader;
         this.lexeme = new StringBuilder();
+        advanceToken();
     }
 
     private Token unexpCharError(char c) {

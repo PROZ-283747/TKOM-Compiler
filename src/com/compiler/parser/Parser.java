@@ -1,6 +1,7 @@
 package com.compiler.parser;
 
 import com.compiler.ErrorHandler;
+import com.compiler.lexer.Lexer;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
 
@@ -13,11 +14,10 @@ import static com.compiler.lexer.TokenType.*;
 public class Parser {
     private static class ParseError extends RuntimeException {}
 
-    private final List<Token> tokens;
-    private int current = 0;
+    private Lexer lexer;
 
-    public Parser(List<Token> tokens) {
-        this.tokens = tokens;
+    public Parser(Lexer lexer) {
+        this.lexer = lexer;
     }
 
     public List<Statement> parse() {
@@ -26,15 +26,14 @@ public class Parser {
         //todo: while((newDeclaration = declaration()) != null)
 //        Statement stmt = declaration();
 //        while(stmt != null && !isAtEnd()){
-//            System.out.println("Statement: " + stmt);
 //            statements.add(stmt);
-//            stmt = declaration(); // todo: za ostatnim stmt isAtAnd ustawia się na true i nie dodaje sie statement.
+//            stmt = declaration(); // TODO: isAtEnd is set
 //        }
         while (!isAtEnd()) {
             statements.add(declaration());
         }
 
-        return statements;
+            return statements;
     }
 
     private Statement declaration() {
@@ -61,7 +60,6 @@ public class Parser {
         consume(LEFT_BRACKET, "Expect '{' before class body.");
 
         List<Statement> body = block();
-
         return new Statement.Class(name, superclass, body);
     }
 
@@ -99,6 +97,7 @@ public class Parser {
         Token container = null;
 
         if(match(FRACTION_T, STRING_T)){
+            //advance
             type = previous();
             iterName = consume(IDENTIFIER, "Expect name of iterator through for loop");
             consume(COLON, "Expect ':' in a for loop condition.");
@@ -181,8 +180,8 @@ public class Parser {
         while (!check(RIGHT_BRACKET) && !isAtEnd()) {
             statements.add(declaration());
         }
-
         consume(RIGHT_BRACKET, "Expect '}' after block.");
+
         return statements;
     }
 
@@ -359,6 +358,7 @@ public class Parser {
                 if (arguments.size() >= 20) {
                     error(peek(), "Cannot have more than 20 arguments.");
                 }
+                // todo: check if not null
 //                Expression expr = expression();
 //                if(expr != null)
 //                    arguments.add(expr);
@@ -410,8 +410,9 @@ public class Parser {
     }
 
     private Token consume(TokenType type, String message) {
-        if (check(type)) return advance();
-
+        if (check(type)) {
+            return advance();
+        }
         throw error(peek(), message);
     }
 
@@ -421,20 +422,20 @@ public class Parser {
     }
 
     private Token advance() {
-        if (!isAtEnd()) current++;
+        if (!isAtEnd()) lexer.advanceToken();
         return previous();
     }
 
     private boolean isAtEnd() {
-        return peek().type == EOF;
+        return peek().type == TokenType.EOF;
     }
 
     private Token peek() {
-        return tokens.get(current);
+        return lexer.getCurrentToken();
     }
 
     private Token previous() {
-        return tokens.get(current - 1);
+        return lexer.getPreviousToken();
     }
 
     private ParseError error(Token token, String message) {
