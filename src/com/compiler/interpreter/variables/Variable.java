@@ -49,12 +49,12 @@ public class Variable {
     }
 
     public enum VarType {
-        Fraction("Fraction"),
-        String("String"),
-        Bool("Bool"),
-        Class("Class"),
-        NonType("NonType"),
-        Function("Function");
+        Fraction("fraction"),
+        String("string"),
+        Bool("bool"),
+        NonType("nonType"),
+        Container("container"),
+        Function("function");
 
         private static final Map<String, VarType> string2VarType;
 

@@ -94,20 +94,21 @@ public class Parser {
 
         Token type = null;
         Token iterName = null;
-        Token container = null;
+        Expression  container = null;
 
         if(match(FRACTION_T, STRING_T)){
             //advance
             type = previous();
             iterName = consume(IDENTIFIER, "Expect name of iterator through for loop");
             consume(COLON, "Expect ':' in a for loop condition.");
-            container = consume(IDENTIFIER, "Expect name of container to iterate on.");
+            consume(IDENTIFIER, "Expect name of container to iterate on.");
+            container = expression();
         }
         consume(RIGHT_PAREN, "Expect ')' after for clauses.");
 
         Statement body = statement();
 
-        return new Statement.For(type, iterName, container, body);
+        return new Statement.For(type, iterName, (Expression.Variable) container, body);
     }
 
     private Statement.Function function(String kind, Token type, Token name) {
@@ -137,30 +138,31 @@ public class Parser {
     }
 
     private Statement ifStatement() {
+        Token ifToken = previous();
         consume(LEFT_PAREN, "Expect '(' after 'if'.");
         Expression condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after if condition.");
 
         consume(LEFT_BRACKET, "Expect '{' after if condition.");
-        List<Statement> bodyBranch = block();
+        Statement bodyBranch = new Statement.Block(block());
 
-        List<Statement> elseBranch = null;
+        Statement elseBranch = null;
         if (match(ELSE)) {
             consume(LEFT_BRACKET, "Expect '{' after if condition.");
-            elseBranch = block();
+            elseBranch = new Statement.Block(block());
         }
 
-        return new Statement.If(condition, bodyBranch, elseBranch);
+        return new Statement.If(ifToken, condition, bodyBranch, elseBranch);
     }
 
     private Statement printStatement() {
-
+        Token print = previous();
         consume(LEFT_PAREN, "Expect '(' after 'if'.");
         Expression value = expression();
         consume(RIGHT_PAREN, "Expect ')' after if condition.");
 
         consume(SEMICOLON, "Expect ';' after value.");
-        return new Statement.Print(value);
+        return new Statement.Print(print, value);
     }
 
     private Statement returnStatement() {

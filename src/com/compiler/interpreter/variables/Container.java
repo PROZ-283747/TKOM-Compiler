@@ -3,7 +3,7 @@ package com.compiler.interpreter.variables;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Container extends Variable {
+public class Container extends Variable implements Iterable {
     private final List<Variable> elements;
 
     Container() {

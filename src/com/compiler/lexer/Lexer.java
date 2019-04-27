@@ -115,6 +115,7 @@ public class Lexer{
             ErrorHandler.printLexerError("Invalid token.", token, null);
             ErrorHandler.stopIfError();
         }
+        System.out.println(token.toString());
     }
 
     public Token getCurrentToken() {

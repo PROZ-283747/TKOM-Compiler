@@ -1,6 +1,7 @@
 package com.compiler.lexer;
 
 import com.compiler.interpreter.variables.Fraction;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Optional;
 
@@ -59,10 +60,10 @@ public class Token {
 
     // TODO: Konrad mówi ze zawsze string a Fraction klase przenieść do interpretera !
     public static Object tokenConverter(Token token) {
-        //if(token.type == TokenType.FRACTION) return new Fraction(token.lexeme);
-        //if(token.type == TokenType.STRING) return token.lexeme;
-        return token.lexeme;
-        //throw new NotImplementedException();
+        if(token.type == TokenType.FRACTION) return new Fraction(token.lexeme);
+        if(token.type == TokenType.STRING) return token.lexeme;
+        //return token.lexeme;
+        throw new NotImplementedException();
     }
 }
 
