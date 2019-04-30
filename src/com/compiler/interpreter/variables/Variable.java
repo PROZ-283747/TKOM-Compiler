@@ -52,8 +52,8 @@ public class Variable {
         Fraction("fraction"),
         String("string"),
         Bool("bool"),
-        NonType("nonType"),
         Container("container"),
+        NonType("nonType"),
         Function("function");
 
         private static final Map<String, VarType> string2VarType;
@@ -73,6 +73,7 @@ public class Variable {
         }
 
         public static VarType fromString(String name) {
+            System.out.println(string2VarType.get(name));
             return string2VarType.get(name);
         }
 

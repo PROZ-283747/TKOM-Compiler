@@ -1,12 +1,8 @@
 package com.compiler.interpreter;
 
 import com.compiler.ErrorHandler;
-import com.compiler.Main;
-import com.compiler.interpreter.variables.Callable;
-import com.compiler.interpreter.variables.Container;
-import com.compiler.interpreter.variables.Function;
+import com.compiler.interpreter.variables.*;
 import com.compiler.interpreter.variables.Iterable;
-import com.compiler.interpreter.variables.Variable;
 import com.compiler.interpreter.variables.Variable.*;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
@@ -257,10 +253,10 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         Variable conditionType = resolve(stmt.condition);
 
         if (conditionType.varType != VarType.Bool) {
-            //ErrorHandler.printResolverError("While condition must be of Bool type.",stmt.condition., stmt.whenToken.getColumn());
+            ErrorHandler.printResolverError("While condition must be of Bool type.",stmt.whileToken.getLine(), stmt.whileToken.getColumn());
         }
         if (((Statement.Block) stmt.body).statements.isEmpty()) {
-            //ErrorHandler.printResolverError("Expect statement in a while body.",stmt.colon.getLine(), stmt.colon.getColumn());
+            ErrorHandler.printResolverError("Expect statement in a while body.",stmt.whileToken.getLine(), stmt.whileToken.getColumn());
         }
 
         beginScope();
@@ -399,8 +395,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     public Void visitForStmt(Statement.For stmt) {
         Variable in = resolve(stmt.container);
 
-        if (!(stmt.container instanceof Iterable)) {
-            ErrorHandler.printResolverError("Item to iterate through is not a container.",stmt.iter.getLine(), stmt.iter.getColumn());
+        if (!(in instanceof Iterable)) {
+            ErrorHandler.printResolverError("Item in for is not iterable. ",stmt.iter.getLine(), stmt.iter.getColumn());
         }
         beginScope();
         declare(stmt.iter, in);
@@ -417,11 +413,18 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     }
 
     @Override
-    public Void visitContainerStmt(Statement.Container expr) {
-        // todo: sprawdzić czy kazdy elemetn jest tego typu co kontener
-        for( Expression elem : expr.elements){
-            resolve(elem);
+    public Void visitContainerStmt(Statement.Container stmt) {
+        Variable container = declare(stmt.name, new Container(stmt.name.getLexeme()));
+        if(stmt.elements != null) {
+            // checks if all elements are appropriate type
+            for (Expression elem : stmt.elements) {
+                Variable element = resolve(elem);
+                if(element.varType != VarType.fromString(stmt.type.getLexeme())){
+                    ErrorHandler.printResolverError("All elements in a container must be the same type as container", stmt.type.getLine(), stmt.type.getColumn());
+                }
+            }
         }
+        define(stmt.name);
         return null;
     }
 

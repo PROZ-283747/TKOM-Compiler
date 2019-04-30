@@ -101,7 +101,6 @@ public class Parser {
             type = previous();
             iterName = consume(IDENTIFIER, "Expect name of iterator through for loop");
             consume(COLON, "Expect ':' in a for loop condition.");
-            consume(IDENTIFIER, "Expect name of container to iterate on.");
             container = expression();
         }
         consume(RIGHT_PAREN, "Expect ')' after for clauses.");
@@ -224,12 +223,13 @@ public class Parser {
     }
 
     private Statement whileStatement() {
+        Token whileToken = previous();
         consume(LEFT_PAREN, "Expect '(' after 'while'.");
         Expression condition = expression();
         consume(RIGHT_PAREN, "Expect ')' after condition.");
         Statement body = statement();
 
-        return new Statement.While(condition, body);
+        return new Statement.While(whileToken, condition, body);
     }
 
     private Statement expressionStatement() {

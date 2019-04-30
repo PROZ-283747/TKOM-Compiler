@@ -4,7 +4,6 @@ import com.compiler.lexer.*;
 import com.compiler.parser.*;
 import com.compiler.interpreter.*;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 
 public class Main {

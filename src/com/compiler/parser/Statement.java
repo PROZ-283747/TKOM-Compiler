@@ -136,7 +136,8 @@ public abstract class Statement {
     }
 
     public static class While extends Statement {
-        While(com.compiler.parser.Expression condition, Statement body) {
+        While(Token whileToken, com.compiler.parser.Expression condition, Statement body) {
+            this.whileToken = whileToken;
             this.condition = condition;
             this.body = body;
         }
@@ -144,13 +145,13 @@ public abstract class Statement {
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitWhileStmt(this);
         }
-
+        public final Token whileToken;
         public final com.compiler.parser.Expression condition;
         public final Statement body;
     }
 
     public static class For extends Statement {
-        For(Token type, Token iter, com.compiler.parser.Expression.Variable container, Statement body) {
+        For(Token type, Token iter, com.compiler.parser.Expression container, Statement body) {
             this.type = type;
             this.iter = iter;
             this.container = container;
@@ -163,7 +164,7 @@ public abstract class Statement {
 
         final Token type;
         public final Token iter;
-        public com.compiler.parser.Expression.Variable container;
+        public com.compiler.parser.Expression container;
         // lista statementów
         public final Statement body;
     }
@@ -179,8 +180,8 @@ public abstract class Statement {
             return visitor.visitContainerStmt(this);
         }
 
-        final Token type;
-        final Token name;
+        public final Token type;
+        public final Token name;
         public final List<com.compiler.parser.Expression> elements;
     }
     public abstract <R> R accept(Visitor<R> visitor);
