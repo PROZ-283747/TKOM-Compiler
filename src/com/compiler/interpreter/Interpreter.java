@@ -116,7 +116,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitPrintStmt(Statement.Print stmt) {
         Object value = evaluate(stmt.expression);
-        System.out.println(stringify(value));
+        System.out.println("PRINT: " + stringify(value));
         return null;
     }
 
@@ -261,25 +261,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         }
 
         return evaluate(expr.right);
-    }
-
-
-
-    @Override
-    public Object visitSuperExpr(Expression.Super expr) {
-        int distance = locals.get(expr);
-        Klass superklass = (Klass)environment.getAt(distance, "super");
-
-        // "this" is always one level nearer that "super"'s environment.
-        Instance object = (Instance)environment.getAt(distance - 1, "this");
-
-        Function method = superklass.findMethod(object, expr.method.lexeme);
-
-        if (method == null) {
-            throw new RuntimeError(expr.method, "Undefined property '" + expr.method.lexeme + "'.");
-        }
-
-        return method;
     }
 
     @Override

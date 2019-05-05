@@ -62,6 +62,7 @@ public class Token {
     public static Object tokenConverter(Token token) {
         if(token.type == TokenType.FRACTION) return new Fraction(token.lexeme);
         if(token.type == TokenType.STRING) return token.lexeme;
+        if(token.type == TokenType.NULL) return token.lexeme;
         //return token.lexeme;
         throw new NotImplementedException();
     }

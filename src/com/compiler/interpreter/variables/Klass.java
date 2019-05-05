@@ -7,12 +7,10 @@ import java.util.Map;
 
 public class Klass extends Variable implements Callable {
     final String name;
-    final Klass superklass;
-    private final Map<String, Function> methods;
+    private Map<String, Function> methods = null;
 
-    public Klass(String name, Klass superklass, Map<String, Function> methods) {
+    public Klass(String name, Map<String, Function> methods) {
         this.name = name;
-        this.superklass = superklass;
         this.methods = methods;
     }
 
@@ -20,11 +18,6 @@ public class Klass extends Variable implements Callable {
         if (methods.containsKey(name)) {
             //return methods.get(name).bind(instance);
         }
-
-        if (superklass != null) {
-            return superklass.findMethod(instance, name);
-        }
-
         return null;
     }
 

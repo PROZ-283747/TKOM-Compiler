@@ -12,7 +12,6 @@ public abstract class Expression {
         R visitAssignExpr(Assign expr);
         R visitBinaryExpr(Binary expr);
         R visitCallExpr(Call expr);
-        R visitSuperExpr(Super expr);
         R visitGroupingExpr(Grouping expr);
         R visitLiteralExpr(Literal expr);
         R visitLogicalExpr(Logical expr);
@@ -64,20 +63,6 @@ public abstract class Expression {
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitCallExpr(this);
         }
-    }
-
-    public static class Super extends Expression {
-        Super(Token keyword, Token method) {
-            this.keyword = keyword;
-            this.method = method;
-        }
-
-        public <R> R accept(Visitor<R> visitor) {
-            return visitor.visitSuperExpr(this);
-        }
-
-        public final Token keyword;
-        public final Token method;
     }
 
     public static class Grouping extends Expression {

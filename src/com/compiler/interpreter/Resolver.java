@@ -81,6 +81,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     private final Interpreter interpreter;
     private final Stack<Map<String, Variable>> scopes = new Stack<>();
     private Function currentFunction = null;
+    private Klass currentClass = null;
 
     public Resolver(Interpreter interpreter) {
         beginScope();
@@ -115,6 +116,24 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
     @Override
     public Void visitClassStmt(Statement.Class stmt) {
+        Klass enclosingClass = currentClass;
+        currentClass = new Klass(stmt.name.getLexeme(), null);
+
+        declare(stmt.name, currentClass);
+        define(stmt.name);
+
+        beginScope();
+
+        resolve(stmt.body);
+        for (Map.Entry<String, Variable> entry : scopes.peek().entrySet()) {
+            currentClass.addParam(entry.getValue());
+            //currentClass.set(entry.getKey(), entry.getValue());
+        }
+
+        endScope();
+
+        currentClass = enclosingClass;
+
         return null;
     }
 
@@ -177,11 +196,6 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
             }
         }
         return callee;
-    }
-
-    @Override
-    public Variable visitSuperExpr(Expression.Super expr) {
-        return null;
     }
 
     @Override
@@ -414,13 +428,19 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
     @Override
     public Void visitContainerStmt(Statement.Container stmt) {
-        Variable container = declare(stmt.name, new Container(stmt.name.getLexeme()));
+        declare(stmt.name, new Container(stmt.name.getLexeme()));
         if(stmt.elements != null) {
             // checks if all elements are appropriate type
             for (Expression elem : stmt.elements) {
                 Variable element = resolve(elem);
                 if(element.varType != VarType.fromString(stmt.type.getLexeme())){
-                    ErrorHandler.printResolverError("All elements in a container must be the same type as container", stmt.type.getLine(), stmt.type.getColumn());
+                    if(elem instanceof Expression.Unary)
+                    {
+                        Variable var = resolve(((Expression.Unary) elem).right);
+                        if(var.varType == VarType.fromString(stmt.type.getLexeme()))
+                             continue;
+                    }
+                    ErrorHandler.printResolverError("All elements in a container must be the same type as container.", stmt.type.getLine(), stmt.type.getColumn());
                 }
             }
         }

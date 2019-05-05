@@ -73,7 +73,6 @@ public class Variable {
         }
 
         public static VarType fromString(String name) {
-            System.out.println(string2VarType.get(name));
             return string2VarType.get(name);
         }
 

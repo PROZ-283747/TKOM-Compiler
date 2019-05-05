@@ -33,7 +33,7 @@ public class Lexer{
         keywords.put("return", TokenType.RETURN);
         keywords.put("class", TokenType.CLASS);
         keywords.put("print", TokenType.PRINT);
-        keywords.put("super", TokenType.SUPER);
+        keywords.put("null", TokenType.NULL);
     }
 
     {
@@ -105,6 +105,7 @@ public class Lexer{
 
         if(c == (char) -1 || c == (char) 0x04){
             currentToken = new Token(TokenType.EOF, "", getLine(), getColumn(), getSignNumber());
+            System.out.println(currentToken.toString());
             return;
         }
         Token token = functions.getOrDefault(c, () -> unexpCharError(c)).get();
@@ -175,7 +176,10 @@ public class Lexer{
 
     private boolean skipComment(char c){
         if (c == '#') {
-            while (reader.peek() != '\n' && reader.peek() != EOF) advance();
+            while (reader.peek() != '\n' && reader.peek() != EOF) {
+                System.out.println(reader.peek());
+                advance();
+            }
             return true;
         }
         return false;

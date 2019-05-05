@@ -53,7 +53,6 @@ public class CodeReader implements Source{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return c;
     }
 

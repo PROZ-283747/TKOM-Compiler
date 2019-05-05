@@ -22,12 +22,14 @@ public class Main {
 
         Interpreter interpreter = new Interpreter();
         Resolver resolver = new Resolver(interpreter);
+
         resolver.resolve(statements);
-//        ErrorHandler.stopIfError();
+        ErrorHandler.stopIfError();
+//
 //        interpreter.interpret(statements);
 //        ErrorHandler.stopIfError();
-
-        errorHandler.printNoErrorMsg();
+//
+//        errorHandler.printNoErrorMsg();
 
 
     }

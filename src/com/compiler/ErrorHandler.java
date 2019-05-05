@@ -31,7 +31,7 @@ public class ErrorHandler {
     }
 
     public static void printResolverError(String msg, int line, int column){
-        System.err.println(String.format("Error while resolving: " + msg + "Line: " + line + " Column: " + column));
+        System.err.println(String.format("Error while resolving: " + msg + " Line: " + line + " Column: " + column));
         //++resolverErrorCount;
     }
 

@@ -48,7 +48,7 @@ public enum TokenType {
     FALSE,              // "false"
     TRUE,               // "true"
     PRINT,              // "print"
-    SUPER,              // "super"
+    NULL,               // "null"
 
     // Literals
     IDENTIFIER,         // eg. "myVariable"

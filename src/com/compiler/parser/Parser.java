@@ -377,16 +377,16 @@ public class Parser {
         if (match(FALSE)) return new Expression.Literal(false);
         if (match(TRUE)) return new Expression.Literal(true);
 
-        if (match(FRACTION, STRING)) {
+        if (match(FRACTION, STRING, NULL)) {
             return new Expression.Literal(Token.tokenConverter(previous())); // returns Fraction or String
         }
 
-        if (match(SUPER)) {
-            Token keyword = previous();
-            consume(DOT, "Expect '.' after 'super'.");
-            Token method = consume(IDENTIFIER, "Expect superclass method name.");
-            return new Expression.Super(keyword, method);
-        }
+//        if (match(SUPER)) {
+//                Token keyword = previous();
+//                consume(DOT, "Expect '.' after 'super'.");
+//                Token method = consume(IDENTIFIER, "Expect superclass method name.");
+//                return new Expression.Super(keyword, method);
+//        }
 
         if (match(IDENTIFIER)) {
             return new Expression.Variable(previous());
