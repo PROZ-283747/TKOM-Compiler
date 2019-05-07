@@ -157,7 +157,14 @@ public class Parser {
     private Statement printStatement() {
         Token print = previous();
         consume(LEFT_PAREN, "Expect '(' after 'if'.");
-        Expression value = expression();
+
+        Expression value = null;
+        if(check(RIGHT_PAREN)) {
+            ErrorHandler.printParserError("Print statement cannot be empty.", print);
+        } else {
+            value = expression();
+        }
+
         consume(RIGHT_PAREN, "Expect ')' after if condition.");
 
         consume(SEMICOLON, "Expect ';' after value.");

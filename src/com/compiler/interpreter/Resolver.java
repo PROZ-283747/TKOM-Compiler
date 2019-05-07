@@ -34,22 +34,19 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         });
         binaryExprTypeChecker.put(TokenType.MINUS, (o, l, r) -> {
             checkNumericOperands(o, l, r);
-            return new Variable(VarType.Bool, null);
+            return l;
         });
         binaryExprTypeChecker.put(TokenType.PLUS, (o, l, r) -> {
-            if (!(l.varType == VarType.Fraction && r.varType == VarType.Fraction) &&
-                    !(l.varType == VarType.String && r.varType == VarType.String)) {
-                ErrorHandler.printResolverError("Operands must be two numbers or two strings.", o.getLine(), o.getColumn());
-            }
+            checkNumericOperands(o, l, r);
             return l;
         });
         binaryExprTypeChecker.put(TokenType.SLASH, (o, l, r) -> {
             checkNumericOperands(o, l, r);
-            return new Variable(VarType.Bool, null);
+            return l;
         });
         binaryExprTypeChecker.put(TokenType.STAR, (o, l, r) -> {
             checkNumericOperands(o, l, r);
-            return new Variable(VarType.Bool, null);
+            return l;
         });
         binaryExprTypeChecker.put(TokenType.BANG_EQUAL, (o, l, r) -> {
             if (l.varType != r.varType) {
@@ -158,6 +155,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         Variable left = resolveVariable(expr, expr.name);
 
         if (left.varType != right.varType) {
+            // todo: always fraction i bool types !!! WHY
+            System.out.println(left.varType + " " +  right.varType);
             ErrorHandler.printResolverError("Incompatible type of value.",expr.name.getLine(), expr.name.getColumn());
         }
         return right;
@@ -249,9 +248,11 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         if (stmt.body.isEmpty()) {
             ErrorHandler.printResolverError("Expect statement in a function body.",stmt.name.getLine(), stmt.name.getColumn());
         } else {
-            Statement lastStatement = stmt.body.get(stmt.body.size() - 1);
-            if (!(lastStatement instanceof Statement.Return) && stmt.returnType != null) {
-                ErrorHandler.printResolverError("Last statement in function must be a return statement.",stmt.returnType.getLine(), stmt.returnType.getColumn());
+            if(!stmt.returnType.getLexeme().equals("void")) {
+                Statement lastStatement = stmt.body.get(stmt.body.size() - 1);
+                if (!(lastStatement instanceof Statement.Return) && stmt.returnType != null) {
+                    ErrorHandler.printResolverError("Last statement in function must be a return statement.", stmt.returnType.getLine(), stmt.returnType.getColumn());
+                }
             }
         }
 
@@ -322,10 +323,10 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
             }
         }
 
-        if (stmt.value == null && ((Callable) returnValue).getReturnType() != VarType.NonType) {
+        if (stmt.value == null && ((Callable) returnValue).getReturnType() != VarType.Void) {
             ErrorHandler.printResolverError("Missing return value.",stmt.keyword.getLine(), stmt.keyword.getColumn());
-        } else if (stmt.value != null && ((Callable) returnValue).getReturnType() == VarType.NonType) {
-            ErrorHandler.printResolverError("Cannot return a value form a function with no return type declared.",stmt.keyword.getLine(), stmt.keyword.getColumn());
+        } else if (stmt.value != null && ((Callable) returnValue).getReturnType() == VarType.Void) {
+            ErrorHandler.printResolverError("Cannot return a value form a function with void type declared.",stmt.keyword.getLine(), stmt.keyword.getColumn());
         } else if (stmt.value != null) {
             Variable returnedType = resolve(stmt.value);
 
@@ -399,7 +400,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     @Override
     public Void visitPrintStmt(Statement.Print stmt) {
         Variable value = resolve(stmt.expression);
-        if (value.varType == VarType.NonType) {
+        if (value.varType == VarType.Void) {
             ErrorHandler.printResolverError("No value to print",stmt.print.getLine(), stmt.print.getColumn());
         }
         return null;

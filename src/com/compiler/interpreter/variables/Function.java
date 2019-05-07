@@ -21,11 +21,7 @@ public class Function extends Variable implements Callable {
     }
 
     public Function(Statement.Function declaration, Environment closure) {
-        if (declaration.returnType != null)
-            this.returnType = VarType.fromString(declaration.returnType.getLexeme());
-        else
-            this.returnType = VarType.NonType;
-
+        this.returnType = VarType.fromString(declaration.returnType.getLexeme());
         super.varType = VarType.Function;
         this.closure = closure;
         this.declaration = declaration;
