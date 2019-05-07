@@ -40,7 +40,7 @@ public class Variable {
     }
 
     public Variable() {
-        this(VarType.NonType, null);
+        this(VarType.Void, null);
     }
 
     public Variable(VarType varType, Object value) {
@@ -53,7 +53,7 @@ public class Variable {
         String("string"),
         Bool("bool"),
         Container("container"),
-        NonType("nonType"),
+        Void("void"),
         Function("function");
 
         private static final Map<String, VarType> string2VarType;
