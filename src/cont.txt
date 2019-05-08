@@ -1,0 +1,11 @@
+#komentarz
+fraction sum = 4%5;
+fraction s = sum + 5;
+string a;
+string b = "abc";
+
+fraction fun(fraction f){
+	fraction a;
+	a = a * 7%4;
+	return a;
+}

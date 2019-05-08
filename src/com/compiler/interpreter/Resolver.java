@@ -71,7 +71,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         });
         unaryExprTypeChecker.put(TokenType.MINUS, (o, t) -> {
             checkNumericOperand(o, t);
-            return new Variable(VarType.Bool, null);
+            //return new Variable(VarType.Bool, null);
+            return t;
         });
     }
 

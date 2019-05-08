@@ -99,6 +99,8 @@ public class Lexer{
     public void advanceToken() {
         skipUnrelevant();
         char c = advance();
+        if (reader.peek() == EOF)
+            System.out.println("koniec: " + c);
 
         tokenColumn = reader.getPosition().column();
         previousToken = currentToken;
@@ -177,7 +179,6 @@ public class Lexer{
     private boolean skipComment(char c){
         if (c == '#') {
             while (reader.peek() != '\n' && reader.peek() != EOF) {
-                System.out.println(reader.peek());
                 advance();
             }
             return true;

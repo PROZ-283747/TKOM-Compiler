@@ -1,0 +1,22 @@
+# KOMENTARZ Language with type fraction
+# eg. 4%7
+
+fraction printFraction(string s, fraction f){
+	string str = s;
+	fraction a = 5;
+	fraction b;
+	b = 3*a;
+	
+	print();
+	
+	return 0;
+	
+}
+
+class Klasa{
+void printFraction(string s, fraction f){
+	fraction a  = 3;
+}
+}
+
+print();
