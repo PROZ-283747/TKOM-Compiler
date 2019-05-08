@@ -70,8 +70,12 @@ public class TestLexer {
         StringReader sr = new StringReader(code);
         Lexer lexer = new Lexer(sr);
         while(lexer.currentToken.type != TokenType.EOF) {
-            tokens.add(lexer.currentToken);
+            System.out.println(lexer.currentToken.type.toString());
             lexer.advanceToken();
+            //System.out.println(lexer.getPreviousToken());
+            //System.out.println(lexer.getCurrentToken());
+            //System.out.println();
+            //tokens.add(lexer.getPreviousToken());
         }
         return tokens;
     }

@@ -10,7 +10,7 @@ import static sun.nio.ch.IOStatus.EOF;
 
 public class Lexer{
 
-    private CodeReader reader;
+    private Source source;
     private StringBuilder lexeme;
     private ErrorHandler errorHandler = new ErrorHandler();
     public Token currentToken; // token to process next
@@ -99,10 +99,8 @@ public class Lexer{
     public void advanceToken() {
         skipUnrelevant();
         char c = advance();
-        if (reader.peek() == EOF)
-            System.out.println("koniec: " + c);
 
-        tokenColumn = reader.getPosition().column();
+        tokenColumn = source.getPosition().column();
         previousToken = currentToken;
 
         if(c == (char) -1 || c == (char) 0x04){
@@ -118,7 +116,7 @@ public class Lexer{
             ErrorHandler.printLexerError("Invalid token.", token, null);
             ErrorHandler.stopIfError();
         }
-        System.out.println(token.toString());
+        //System.out.println(token.toString());
     }
 
     public Token getCurrentToken() {
@@ -146,14 +144,14 @@ public class Lexer{
     }
 
     private char advance(){
-        char c = reader.getChar();
+        char c = source.getChar();
         lexeme.append(c);
 
         return c;
     }
 
     private boolean expect(int expected){
-        if (reader.peek() == expected) {
+        if (source.peek() == expected) {
             advance();
             return true;
         }
@@ -161,10 +159,10 @@ public class Lexer{
     }
 
     private void skipUnrelevant(){
-        char c = reader.peek();
+        char c = source.peek();
         while (skipWhitespace(c) || skipComment(c)) {
             getLexeme();
-            c = reader.peek();
+            c = source.peek();
         }
     }
 
@@ -178,7 +176,7 @@ public class Lexer{
 
     private boolean skipComment(char c){
         if (c == '#') {
-            while (reader.peek() != '\n' && reader.peek() != EOF) {
+            while (source.peek() != '\n' && source.peek() != EOF) {
                 advance();
             }
             return true;
@@ -189,14 +187,14 @@ public class Lexer{
     private Token number() {
         char c = '\0';
         
-        while(isDigit(reader.peek())){
+        while(isDigit(source.peek())){
             advance();
         }
-        if(reader.peek() == '%')
+        if(source.peek() == '%')
             c = advance();       
-        if (c == '%' && isDigit(reader.peek())) {
+        if (c == '%' && isDigit(source.peek())) {
             advance();
-            while (isDigit(reader.peek())) {
+            while (isDigit(source.peek())) {
                 advance();
             }
         }
@@ -218,7 +216,7 @@ public class Lexer{
             denomin = Integer.parseInt(value.substring(index+1, value.length()));
         }
         if(denomin == 0){
-            Token token = unexpCharError(reader.peek());
+            Token token = unexpCharError(source.peek());
             errorHandler.printLexerError("ERROR: It's  impossible to create fraction. Denominator cannot be 0 !", token,null);
             System.exit(-1);
         }
@@ -226,7 +224,7 @@ public class Lexer{
     }
 
     private Token identifier(){
-        while (isAlphaNumeric(reader.peek())) {
+        while (isAlphaNumeric(source.peek())) {
             advance();
         }
 
@@ -240,8 +238,8 @@ public class Lexer{
     }
 
     private Token string(){
-        while (reader.peek() != '"') {
-            if (advance() == '\n' || reader.isEOF()) {
+        while (source.peek() != '"') {
+            if (advance() == '\n' || source.isEOF()) {
             }
         }
         advance();
@@ -265,15 +263,15 @@ public class Lexer{
     }
 
     private int getColumn() {
-        return reader.getPosition().column();
+        return source.getPosition().column();
     }
 
     private int getLine() {
-        return reader.getPosition().line();
+        return source.getPosition().line();
     }
 
     private int getSignNumber(){
-        return reader.getPosition().signNumber();
+        return source.getPosition().signNumber();
     }
 
     public Token setToken(TokenType type) {
@@ -284,8 +282,8 @@ public class Lexer{
         return new Token(type, text, line, tokenColumn, signNumber);
     }
 
-    public Lexer(CodeReader reader) {
-        this.reader = reader;
+    public Lexer(Source source) {
+        this.source = source;
         this.lexeme = new StringBuilder();
         advanceToken();
     }
