@@ -24,7 +24,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
                     execute(statement);
             }
         } catch (RuntimeError error) {
-            //Lox.runtimeError(error);
+            throw error;
         }
     }
 
@@ -50,8 +50,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     private Variable evaluate(Expression expr) {
-        //return expr.accept(this);
-        return null;
+        return expr.accept(this);
+//        return null;
     }
 
     @Override
@@ -106,9 +106,9 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitIfStmt(Statement.If stmt) {
         if (isTruthy(evaluate(stmt.condition))) {
-            //execute(stmt.thenBranch);
+            execute(stmt.thenBranch);
         } else if (stmt.elseBranch != null) {
-            //execute(stmt.elseBranch);
+            execute(stmt.elseBranch);
         }
         return null;
     }
@@ -196,10 +196,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
                 return (double)left <= (double)right;
             case MINUS:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left - (double)right;
+                return ((Fraction)left).substract((Fraction)right);
             case PLUS:
-                if (left instanceof Double && right instanceof Double) {
-                    return (double)left + (double)right;
+                if (left instanceof Fraction && right instanceof Fraction) {
+                    return ((Fraction)left).add((Fraction)right);
                 }
 
                 if (left instanceof String && right instanceof String) {
@@ -209,12 +209,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
                 throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
             case SLASH:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left / (double)right;
+                return ((Fraction)left).divide((Fraction)right);
             case STAR:
                 checkNumberOperands(expr.operator, left, right);
-                return (double)left * (double)right;
+                return ((Fraction)left).multiply((Fraction)right);
         }
-
         // Unreachable.
         return null;
     }
@@ -330,7 +329,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             }
             return text;
         }
-
         return object.toString();
     }
 }

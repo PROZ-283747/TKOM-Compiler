@@ -1,5 +1,7 @@
 package com.compiler.interpreter.variables;
 
+import com.sun.javaws.exceptions.ErrorCodeResponseException;
+
 public class Fraction {
 
     int nominator;
@@ -40,19 +42,19 @@ public class Fraction {
         denominator = denomin;
     };
 
-    void setNominator(int nomin){
+    public void setNominator(int nomin){
         nominator = nomin;
     };
 
-    void setDenominator(int denomin){
+    public void setDenominator(int denomin){
         denominator = denomin;
     };
 
-    int getNominator(){
+    public int getNominator(){
         return nominator;
     };
 
-    int getDenominator(){
+    public int getDenominator(){
         return denominator;
     }
 
@@ -75,36 +77,95 @@ public class Fraction {
         return new Fraction(fraction.nominator/nwd, fraction.denominator/nwd);
     }
 
-    Fraction add (Fraction first, Fraction second) {
-        int nww = NWW(first.denominator, second.denominator);
+    Fraction toGivenDenominator(Fraction fraction, int newDenominator){
+        if(fraction.denominator < newDenominator) {
+            if (newDenominator % fraction.denominator != 0)
+                throw new Error("When getting fraction to given denominator, it is need to be divisible completely!");
+            int num = newDenominator / fraction.denominator;
+            return new Fraction(fraction.nominator * num, newDenominator);
+        } else{
+            if (fraction.denominator % newDenominator!= 0)
+                throw new Error("When getting fraction to given denominator, it is need to be divisible completely!");
+            int num = fraction.denominator /  newDenominator;
+            return new Fraction(fraction.nominator / num, newDenominator);
+        }
+    }
 
-        int newNominator = first.nominator*(nww/first.denominator) + second.nominator*(nww/second.denominator);
+    public Fraction add(Fraction right) {
+        int nww = NWW(this.denominator, right.denominator);
+
+        int newNominator = this.nominator*(nww/this.denominator) + right.nominator*(nww/right.denominator);
         int newDenominator = nww;
 
         return reduceFraction(new Fraction(newNominator, newDenominator));
     }
 
-    Fraction substract(Fraction first, Fraction second) {
-        int nww = NWW(first.denominator, second.denominator);
-        int newNominator = first.nominator*(nww/first.denominator) - second.nominator*(nww/second.denominator);
+    public Fraction substract(Fraction right) {
+        int nww = NWW(this.denominator, right.denominator);
+        int newNominator = this.nominator*(nww/this.denominator) - right.nominator*(nww/right.denominator);
         int newDenominator = nww;
 
         return reduceFraction(new Fraction(newNominator, newDenominator));
     }
 
-    Fraction multiply(Fraction first, Fraction second) {
-        return reduceFraction(new Fraction(first.getNominator() * second.getNominator(), first.getDenominator() * second.getDenominator()));
+    public Fraction multiply(Fraction right) {
+        return reduceFraction(new Fraction(this.getNominator() * right.getNominator(), this.getDenominator() * right.getDenominator()));
     }
 
-    Fraction divide(Fraction first, Fraction second) {
-        return reduceFraction(new Fraction(first.getNominator() * second.getDenominator(), first.getDenominator() * second.getNominator()));
+    public Fraction divide(Fraction right) {
+        return reduceFraction(new Fraction(this.getNominator() * right.getDenominator(), this.getDenominator() * right.getNominator()));
     }
 
-    boolean isEqual(Fraction first, Fraction second){
-        if(reduceFraction(first).getNominator() == reduceFraction(second).getNominator() &&
-                reduceFraction(first).getDenominator() == reduceFraction(second).getDenominator())
+    public boolean isEqual(Fraction right){
+        if(reduceFraction(this).getNominator() == reduceFraction(right).getNominator() &&
+                reduceFraction(this).getDenominator() == reduceFraction(right).getDenominator())
             return true;
 
         return false;
     }
+
+    public boolean isGreater(Fraction right){
+        Fraction reducedLeft = reduceFraction(this);
+        Fraction reducedRight = reduceFraction(right);
+        int nww = NWW(reducedLeft.denominator, reducedRight.denominator);
+
+        if(toGivenDenominator(this,nww).nominator > toGivenDenominator(right, nww).nominator)
+            return true;
+
+        return false;
+    }
+
+    public boolean isGreaterEqual(Fraction right){
+        Fraction reducedLeft = reduceFraction(this);
+        Fraction reducedRight = reduceFraction(right);
+        int nww = NWW(reducedLeft.denominator, reducedRight.denominator);
+
+        if(toGivenDenominator(this,nww).nominator >= toGivenDenominator(right, nww).nominator)
+            return true;
+
+        return false;
+    }
+
+    public boolean isLess(Fraction right){
+        Fraction reducedLeft = reduceFraction(this);
+        Fraction reducedRight = reduceFraction(right);
+        int nww = NWW(reducedLeft.denominator, reducedRight.denominator);
+
+        if(toGivenDenominator(this,nww).nominator < toGivenDenominator(right, nww).nominator)
+            return true;
+
+        return false;
+    }
+
+    public boolean isLessEqual(Fraction right){
+        Fraction reducedLeft = reduceFraction(this);
+        Fraction reducedRight = reduceFraction(right);
+        int nww = NWW(reducedLeft.denominator, reducedRight.denominator);
+
+        if(toGivenDenominator(this,nww).nominator <= toGivenDenominator(right, nww).nominator)
+            return true;
+
+        return false;
+    }
+
 }

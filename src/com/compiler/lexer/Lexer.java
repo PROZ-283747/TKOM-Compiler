@@ -56,8 +56,8 @@ public class Lexer{
         functions.put('-', () -> minusSign());
 
         functions.put('=', () -> setToken(expect('=') ? TokenType.EQUAL_EQUAL: TokenType.EQUAL));
-        functions.put('>', () -> setToken(expect('=') ? TokenType.GREATER : TokenType.GREATER_EQUAL));
-        functions.put('<', () -> setToken(expect('=') ? TokenType.LESS : TokenType.LESS_EQUAL));
+        functions.put('>', () -> setToken(expect('=') ? TokenType.GREATER_EQUAL : TokenType.GREATER));
+        functions.put('<', () -> setToken(expect('=') ? TokenType.LESS_EQUAL : TokenType.LESS));
         functions.put('!', () -> setToken(expect('=') ? TokenType.BANG_EQUAL : TokenType.BANG));
         functions.put('&', () -> setToken(expect('&') ? TokenType.AND : TokenType.ERROR));
         functions.put('|', () -> setToken(expect('|') ? TokenType.OR : TokenType.ERROR));
@@ -105,7 +105,7 @@ public class Lexer{
 
         if(c == (char) -1 || c == (char) 0x04){
             currentToken = new Token(TokenType.EOF, "", getLine(), getColumn(), getSignNumber());
-            System.out.println(currentToken.toString());
+            //System.out.println(currentToken.toString());
             return;
         }
         Token token = functions.getOrDefault(c, () -> unexpCharError(c)).get();

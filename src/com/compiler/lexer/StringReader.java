@@ -13,7 +13,6 @@ public class StringReader  implements Source {
 
     @Override
     public char getChar() {
-        //System.out.println("char: " + code.charAt(currPos));
         if(isEOF())
             return (char) -1;
         else {

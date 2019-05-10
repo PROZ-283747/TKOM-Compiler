@@ -249,7 +249,9 @@
 //
 //    List<Statement> testParser(List<Token> tokens){
 //        tokens.add(setToken(EOF));
-//        Parser parser = new Parser(tokens);
+//        for(int i=0; i<tokens.size(); ++i) {
+//            Parser parser = new Parser(tokens.get(i));
+//        }
 //        return parser.parse();
 //    }
 //}

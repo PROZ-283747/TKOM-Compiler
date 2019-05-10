@@ -162,7 +162,7 @@ public abstract class Statement {
             return visitor.visitForStmt(this);
         }
 
-        final Token type;
+        public final Token type;
         public final Token iter;
         public com.compiler.parser.Expression container;
         // lista statementów

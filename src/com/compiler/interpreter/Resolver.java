@@ -415,7 +415,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
             ErrorHandler.printResolverError("Item in for is not iterable. ",stmt.iter.getLine(), stmt.iter.getColumn());
         }
         beginScope();
-        declare(stmt.iter, in);
+        declare(stmt.iter, new Variable(VarType.fromString(stmt.type.getLexeme()), null));
         define(stmt.iter);
 
         if (((Statement.Block) stmt.body).statements.isEmpty()) {

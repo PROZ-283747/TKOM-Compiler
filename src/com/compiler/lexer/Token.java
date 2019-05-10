@@ -58,7 +58,6 @@ public class Token {
         return "type: " + type + " \"" + lexeme + "\"" + " line: " + line +" column: " + column + " signNumber: " + signNumber ;
     }
 
-    // TODO: Konrad mówi ze zawsze string a Fraction klase przenieść do interpretera !
     public static Object tokenConverter(Token token) {
         if(token.type == TokenType.FRACTION) return new Fraction(token.lexeme);
         if(token.type == TokenType.STRING) return token.lexeme;
