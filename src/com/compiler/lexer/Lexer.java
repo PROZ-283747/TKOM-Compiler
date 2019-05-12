@@ -33,6 +33,8 @@ public class Lexer{
         keywords.put("return", TokenType.RETURN);
         keywords.put("class", TokenType.CLASS);
         keywords.put("print", TokenType.PRINT);
+        keywords.put("true", TokenType.TRUE);
+        keywords.put("false", TokenType.FALSE);
         keywords.put("null", TokenType.NULL);
     }
 

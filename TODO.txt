@@ -1,3 +1,6 @@
--usun¹æ lub naprawiæ 'true' i 'false' (if condition)
--usun¹æ lub naprawiæ += i -+
--komentarz na koñcu pliku psuje 
+- usun¹æ lub naprawiæ += i -+
+- komentarz na koñcu pliku psuje 
+- nie dzia³a if(-5 > 4), bo nie mozna utowrzc Fractiona WTF
+- odow³ywanie sie do obiektów z klas: klasa.obiekt
+- ³adniejsze printy !
+- 

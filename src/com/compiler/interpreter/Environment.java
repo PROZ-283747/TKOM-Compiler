@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Environment {
     final Environment enclosing;
-    private final Map<String, Variable> values = new HashMap<>();
+    final Map<String, Variable> values = new HashMap<>();
 
     public Environment() {
         enclosing = null;
@@ -18,7 +18,7 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
-    public Object get(Token name) {
+    public Variable get(Token name) {
         if (values.containsKey(name.lexeme)) {
             return values.get(name.lexeme);
         }
@@ -56,12 +56,11 @@ public class Environment {
         return environment;
     }
 
-    public Object getAt(int distance, String name) {
+    public Variable getAt(int distance, String name) {
         return ancestor(distance).values.get(name);
     }
 
     void assignAt(int distance, Token name, Variable value) {
         ancestor(distance).values.put(name.getLexeme(), value);
     }
-
 }

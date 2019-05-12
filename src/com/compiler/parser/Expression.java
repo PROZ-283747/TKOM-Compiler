@@ -17,6 +17,7 @@ public abstract class Expression {
         R visitLogicalExpr(Logical expr);
         R visitUnaryExpr(Unary expr);
         R visitVariableExpr(Variable expr);
+        R visitGetExpr(Get expr);
     }
 
     public static class Assign extends Expression {
@@ -129,5 +130,19 @@ public abstract class Expression {
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitVariableExpr(this);
         }
+    }
+
+    public static class Get extends Expression {
+        Get(Expression object, Token name) {
+            this.object = object;
+            this.name = name;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitGetExpr(this);
+        }
+
+        public final Expression object;
+        public final Token name;
     }
 }

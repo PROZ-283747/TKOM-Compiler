@@ -54,7 +54,8 @@ public class Variable {
         Bool("bool"),
         Container("container"),
         Void("void"),
-        Function("function");
+        Function("function"),
+        Class("class");
 
         private static final Map<String, VarType> string2VarType;
 

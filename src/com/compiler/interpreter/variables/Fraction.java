@@ -167,5 +167,12 @@ public class Fraction {
 
         return false;
     }
+    public Fraction changeSign(){
+        return new Fraction(-this.getNominator(), this.getDenominator());
+    }
 
+    @Override
+    public String toString() {
+        return nominator + "%" + denominator;
+    }
 }

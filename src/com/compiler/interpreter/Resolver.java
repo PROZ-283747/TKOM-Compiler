@@ -106,16 +106,16 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
     @Override
     public Void visitBlockStmt(Statement.Block stmt) {
-        beginScope();
+        //beginScope();
         resolve(stmt.statements);
-        endScope();
+        //endScope();
         return null;
     }
 
     @Override
     public Void visitClassStmt(Statement.Class stmt) {
         Klass enclosingClass = currentClass;
-        currentClass = new Klass(stmt.name.getLexeme(), null);
+        currentClass = new Klass(stmt.name.getLexeme());
 
         declare(stmt.name, currentClass);
         define(stmt.name);
@@ -124,8 +124,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
         resolve(stmt.body);
         for (Map.Entry<String, Variable> entry : scopes.peek().entrySet()) {
-            currentClass.addParam(entry.getValue());
-            //currentClass.set(entry.getKey(), entry.getValue());
+            currentClass.set(entry.getKey(), entry.getValue());
         }
 
         endScope();
@@ -148,6 +147,25 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
             ErrorHandler.printResolverError("Cannot read local variable in its own initializer.", expr.name.getLine(), expr.name.getColumn());
         }
         return resolveVariable(expr, expr.name);
+    }
+
+    @Override
+    public Variable visitGetExpr(Expression.Get expr){
+        Variable gettable = resolve(expr.object);
+
+        if (gettable instanceof Gettable){
+            Variable var = ((Gettable) gettable).get(expr.name.getLexeme());
+
+            if (var == null) {
+                //Main.error("'" + ((Gettable) gettable).getName() + "' doesn't have '" + expr.name.getLexeme() + "' property.", expr.name.getLine(), expr.name.getColumn());
+                return new Variable();
+            }
+            return var;
+        } else {
+            //Main.error("This item is not gettable.", expr.name.getLine(), expr.name.getColumn());
+        }
+
+        return new Variable();
     }
 
     @Override
@@ -431,7 +449,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     @Override
     public Void visitContainerStmt(Statement.Container stmt) {
         declare(stmt.name, new Container(stmt.name.getLexeme()));
-        if(stmt.elements != null) {
+        if(!stmt.elements.isEmpty()) {
             // checks if all elements are appropriate type
             for (Expression elem : stmt.elements) {
                 Variable element = resolve(elem);

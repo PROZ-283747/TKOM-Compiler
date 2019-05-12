@@ -1,39 +1,132 @@
 package com.compiler.interpreter;
 
 import com.compiler.interpreter.variables.*;
+import com.compiler.interpreter.variables.Iterable;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
 import com.compiler.parser.Expression;
 import com.compiler.parser.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import java.util.*;
+import java.util.function.BiFunction;
 
-public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
-    final Environment globals = new Environment();
-    private Environment environment = globals;
+public class Interpreter implements Expression.Visitor<Variable>, Statement.Visitor<Void> {
+    private static final Map<TokenType, BiFunction<Object, Object, Object>> binaryExprEvaluator = new HashMap<>();
+    private static final Map<TokenType, java.util.function.Function<Object, Object>> unaryExprEvaluator = new HashMap<>();
+
+    static {
+        binaryExprEvaluator.put(TokenType.GREATER, (l, r) -> ((Fraction)l).isGreater((Fraction)r));
+        binaryExprEvaluator.put(TokenType.GREATER_EQUAL, (l, r) -> ((Fraction)l).isGreaterEqual((Fraction)r));
+        binaryExprEvaluator.put(TokenType.LESS, (l, r) -> ((Fraction)l).isLess((Fraction)r));
+        binaryExprEvaluator.put(TokenType.LESS_EQUAL, (l, r) -> ((Fraction)l).isLessEqual((Fraction)r));
+        binaryExprEvaluator.put(TokenType.BANG_EQUAL, (l, r) -> !((Fraction)l).isEqual((Fraction)r));
+        binaryExprEvaluator.put(TokenType.EQUAL_EQUAL, (l, r) -> ((Fraction)l).isEqual((Fraction)r));
+        binaryExprEvaluator.put(TokenType.MINUS, (l, r) -> ((Fraction)l).substract((Fraction)r));
+        binaryExprEvaluator.put(TokenType.PLUS, (l, r) -> {
+            if (l instanceof Fraction) {
+                return ((Fraction)l).add((Fraction)r);
+            }
+            if (l instanceof String) {
+                return (String) l + r;
+            }
+            throw new NotImplementedException();
+            //throw new InterpretingException(new Token(TokenType.PLUS, "", null, 0, 0), "Addition not allowed.");
+        });
+        binaryExprEvaluator.put(TokenType.SLASH, (l, r) -> ((Fraction)l).divide((Fraction)r));
+        binaryExprEvaluator.put(TokenType.STAR, (l, r) -> ((Fraction)l).multiply((Fraction)r));
+    }
+
+    static {
+        unaryExprEvaluator.put(TokenType.BANG, (o) -> !isTrue(o));
+        unaryExprEvaluator.put(TokenType.MINUS, (o) -> ((Fraction)o).changeSign());
+    }
+
+    private final Environment globals = new Environment();
     private final Map<Expression, Integer> locals = new HashMap<>();
+    private Environment environment = globals;
 
-    public Interpreter() {}
+    public static boolean isTrue(Object object) {
+//        if (object == null) return false;
+//        if (object instanceof Boolean) return (boolean)object;
+//        return true;
+        return (boolean) object;
+    }
+
+    private static boolean isEqual(Object a, Object b) {
+        return a.equals(b);
+    }
 
     public void interpret(List<Statement> statements) {
         try {
             for (Statement statement : statements) {
-                if(statement != null)
-                    execute(statement);
+                if (statement != null) execute(statement);
             }
-        } catch (RuntimeError error) {
-            throw error;
         }
+        catch (Exception error) {
+           throw error; // todo: modify!!!!
+        }
+
     }
 
-    private void execute(Statement stmt) {
-        stmt.accept(this);
+    @Override
+    public Variable visitLiteralExpr(Expression.Literal expr) {
+        return new Variable(expr.value);
     }
 
-    void resolve(Expression expr, int depth) {
-        locals.put(expr, depth);
+    public void resolve(Expression expression, int depth) {
+        locals.put(expression, depth);
+    }
+
+    @Override
+    public Variable visitLogicalExpr(Expression.Logical expr) {
+        Variable left = evaluate(expr.left);
+
+        if (expr.operator.getType() == TokenType.OR) {
+            if (isTrue(left.value)) return left;
+        } else {
+            if (!isTrue(left.value)) return left;
+        }
+
+        return evaluate(expr.right);
+    }
+
+    @Override
+    public Void visitBlockStmt(Statement.Block stmt) {
+        executeBlock(stmt.statements, new Environment(environment));
+        return null;
+    }
+
+    @Override
+    public Void visitClassStmt(Statement.Class stmt) {
+
+        environment.define(stmt.name.getLexeme(), null);
+        Environment env = new Environment(environment);
+        executeBlock(stmt.body, env);
+
+        Klass klass = new Klass(stmt.name.getLexeme());
+        klass.properties = env.values;
+
+        environment.assign(stmt.name, klass);
+        return null;
+    }
+
+    @Override
+    public Variable visitGroupingExpr(Expression.Grouping expr) {
+        return evaluate(expr.expression);
+    }
+
+    public Variable evaluate(Expression expression) {
+        return expression.accept(this);
+    }
+
+    @Override
+    public Void visitExpressionStmt(Statement.Expression stmt) {
+        evaluate(stmt.expression);
+        return null;
+    }
+
+    void execute(Statement statement) {
+        statement.accept(this);
     }
 
     public void executeBlock(List<Statement> statements, Environment environment) {
@@ -49,74 +142,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         }
     }
 
-    private Variable evaluate(Expression expr) {
-        return expr.accept(this);
-//        return null;
-    }
-
-    @Override
-    public Void visitBlockStmt(Statement.Block stmt) {
-        executeBlock(stmt.statements, new Environment(environment));
-        return null;
-    }
-
-    @Override
-    public Void visitClassStmt(Statement.Class stmt) {
-//        environment.define(stmt.name.lexeme, null);
-//        Variable superclass = null;
-//        if (stmt.superclass != null) {
-//            superclass = evaluate(stmt.superclass);
-//            if (!(superclass instanceof Klass)) {
-//                throw new RuntimeError(stmt.name, "Superclass must be a class.");
-//            }
-//            environment = new Environment(environment);
-//            environment.define("super", superclass);
-//        }
-//
-//        //Map<String, Function> methods = new HashMap<>();
-//        List<Statement> methods = new ArrayList<>();
-//        for (Statement method : stmt.body){
-//            Function function = new Function(method, environment, method.name.lexeme.equals("init"));
-//            methods.put(method.name.lexeme, function);
-//        }
-//
-//        Klass klass = new Klass(stmt.name.lexeme, (Klass)superclass, methods);
-//
-//        if (superclass != null) {
-//            environment = environment.enclosing;
-//        }
-//
-//        environment.assign(stmt.name, klass);
-        return null;
-    }
-
-    @Override
-    public Void visitExpressionStmt(Statement.Expression stmt) {
-        evaluate(stmt.expression);
-        return null;
-    }
-
-    @Override
-    public Void visitFunctionStmt(Statement.Function stmt) {
-        Function function = new Function(stmt, environment);
-        environment.define(stmt.name.getLexeme(), function);
-        return null;
-    }
-
     @Override
     public Void visitIfStmt(Statement.If stmt) {
-        if (isTruthy(evaluate(stmt.condition))) {
+        if (isTrue(evaluate(stmt.condition).value)) {
             execute(stmt.thenBranch);
         } else if (stmt.elseBranch != null) {
             execute(stmt.elseBranch);
         }
-        return null;
-    }
-
-    @Override
-    public Void visitPrintStmt(Statement.Print stmt) {
-        Object value = evaluate(stmt.expression);
-        System.out.println("PRINT: " + stringify(value));
         return null;
     }
 
@@ -135,13 +167,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             value = evaluate(stmt.initializer);
         }
 
-        environment.define(stmt.name.lexeme, value);
+        environment.define(stmt.name.getLexeme(), value);
         return null;
     }
 
     @Override
     public Void visitWhileStmt(Statement.While stmt) {
-        while (isTruthy(evaluate(stmt.condition))) {
+        while (isTrue(evaluate(stmt.condition).value)) {
             execute(stmt.body);
         }
         return null;
@@ -149,186 +181,100 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitForStmt(Statement.For stmt) {
-        return null;
-    }
+        Variable in = evaluate(stmt.container);
 
-    @Override
-    public Void visitContainerStmt(Statement.Container expr) {
+        for (Variable element : ((Iterable)in).getCollection().getElements()) {
+            environment = new Environment(environment);
 
-        return null;
-    }
-
-    @Override
-    public Object visitAssignExpr(Expression.Assign expr) {
-        Variable value = evaluate(expr.value);
-
-        Integer distance = locals.get(expr);
-        if (distance != null) {
-            environment.assignAt(distance, expr.name, value);
-        } else {
-            globals.assign(expr.name, value);
+            environment.define(stmt.iter.getLexeme(), element);
+            executeBlock(((Statement.Block) stmt.body).statements, environment);
+            environment = environment.enclosing;
         }
+
+        return null;
+    }
+
+    @Override
+    public Void visitContainerStmt(Statement.Container stmt) {
+        Container container = new Container(stmt.name.getLexeme());
+
+        if(!stmt.elements.isEmpty()) {
+            for(Expression elem : stmt.elements) {
+                container.addElement(evaluate(elem));
+            }
+        }
+        environment.define(stmt.name.getLexeme(), container);
+        return null;
+    }
+
+    @Override
+    public Variable visitAssignExpr(Expression.Assign expr) {
+        Variable value = evaluate(expr.value);
+        environment.assign(expr.name, value);
 
         return value;
     }
 
     @Override
-    public Object visitBinaryExpr(Expression.Binary expr) {
-        Object left = evaluate(expr.left);
-        Object right = evaluate(expr.right);
+    public Variable visitBinaryExpr(Expression.Binary expr) {
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
 
-        switch (expr.operator.type) {
-            case BANG_EQUAL:
-                return !isEqual(left, right);
-            case EQUAL_EQUAL:
-                return isEqual(left, right);
-            case GREATER:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left > (double)right;
-            case GREATER_EQUAL:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left >= (double)right;
-            case LESS:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left < (double)right;
-            case LESS_EQUAL:
-                checkNumberOperands(expr.operator, left, right);
-                return (double)left <= (double)right;
-            case MINUS:
-                checkNumberOperands(expr.operator, left, right);
-                return ((Fraction)left).substract((Fraction)right);
-            case PLUS:
-                if (left instanceof Fraction && right instanceof Fraction) {
-                    return ((Fraction)left).add((Fraction)right);
-                }
-
-                if (left instanceof String && right instanceof String) {
-                    return (String)left + (String)right;
-                }
-
-                throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings.");
-            case SLASH:
-                checkNumberOperands(expr.operator, left, right);
-                return ((Fraction)left).divide((Fraction)right);
-            case STAR:
-                checkNumberOperands(expr.operator, left, right);
-                return ((Fraction)left).multiply((Fraction)right);
-        }
-        // Unreachable.
-        return null;
+        Object result = binaryExprEvaluator.get(expr.operator.getType()).apply(left.value, right.value);
+        return new Variable(result);
     }
 
     @Override
-    public Object visitCallExpr(Expression.Call expr) {
-        Object callee = evaluate(expr.callee);
+    public Variable visitCallExpr(Expression.Call expr) {
+        Callable callee = (Callable) evaluate(expr.callee);
 
         List<Variable> arguments = new ArrayList<>();
         for (Expression argument : expr.arguments) {
             arguments.add(evaluate(argument));
         }
 
-        if (!(callee instanceof Callable)) {
-            throw new RuntimeError(expr.paren, "Can only call functions and klasses.");
-        }
-
-        Callable function = (Callable)callee;
-        if (arguments.size() != function.arity()) {
-            throw new RuntimeError(expr.paren, "Expected " + function.arity() + " arguments but got " + arguments.size() + ".");
-        }
-
-        return function.call(this, arguments);
+        return callee.call(this, arguments);
     }
 
     @Override
-    public Object visitGroupingExpr(Expression.Grouping expr) {
-        return evaluate(expr.expression);
-    }
-
-    @Override
-    public Object visitLiteralExpr(Expression.Literal expr) {
-        return expr.value;
-    }
-
-    @Override
-    public Object visitLogicalExpr(Expression.Logical expr) {
-        Object left = evaluate(expr.left);
-
-        if (expr.operator.type == TokenType.OR) {
-            if (isTruthy(left)) return left;
-        } else {
-            if (!isTruthy(left)) return left;
-        }
-
-        return evaluate(expr.right);
-    }
-
-    @Override
-    public Object visitUnaryExpr(Expression.Unary expr) {
-        Object right = evaluate(expr.right);
-
-        switch (expr.operator.type) {
-            case BANG:
-                return !isTruthy(right);
-            case MINUS:
-                checkNumberOperand(expr.operator, right);
-                // todo: rzutować na Fraction czy co ?
-                return -(double)right;
-        }
-
-        // Unreachable.
+    public Void visitFunctionStmt(Statement.Function stmt) {
+        Function function = new Function(stmt, environment);
+        environment.define(stmt.name.getLexeme(), function);
         return null;
     }
 
     @Override
-    public Object visitVariableExpr(Expression.Variable expr) {
+    public Variable visitUnaryExpr(Expression.Unary expr) {
+        Variable operand = evaluate(expr.right);
+
+        Object result = unaryExprEvaluator.get(expr.operator.getType()).apply(operand.value);
+        return new Variable(result);
+    }
+
+    @Override
+    public Variable visitVariableExpr(Expression.Variable expr) {
         return lookUpVariable(expr.name, expr);
     }
 
-    private Object lookUpVariable(Token name, Expression expr) {
-        Integer distance = locals.get(expr);
+    @Override
+    public Variable visitGetExpr(Expression.Get expr) {
+        return null;
+    }
+
+    @Override
+    public Void visitPrintStmt(Statement.Print stmt) {
+        Variable variable = evaluate(stmt.expression);
+        System.out.println(variable.value);
+        return null;
+    }
+
+    private Variable lookUpVariable(Token name, Expression expression) {
+        Integer distance = locals.get(expression);
         if (distance != null) {
-            return environment.getAt(distance, name.lexeme);
+            return environment.getAt(distance, name.getLexeme());
         } else {
             return globals.get(name);
         }
     }
 
-    private void checkNumberOperand(Token operator, Object operand) {
-        if (operand instanceof Double) return;
-        throw new RuntimeError(operator, "Operand must be a number.");
-    }
-
-    private void checkNumberOperands(Token operator, Object left, Object right) {
-        if (left instanceof Double && right instanceof Double) return;
-        throw new RuntimeError(operator, "Operands must be numbers.");
-    }
-
-    private boolean isTruthy(Object object) {
-        if (object == null) return false;
-        if (object instanceof Boolean) return (boolean)object;
-        return true;
-    }
-
-    //todo: jeśli Fraction to metoda z fraction, jesli string to equals()
-    private boolean isEqual(Object a, Object b) {
-        // nil is only equal to nil.
-        if (a == null && b == null) return true;
-        if (a == null) return false;
-
-        return a.equals(b);
-    }
-
-    private String stringify(Object object) {
-        if (object == null) return "nil";
-
-        // Hack. Work around Java adding ".0" to integer-valued doubles.
-        if (object instanceof Double) {
-            String text = object.toString();
-            if (text.endsWith(".0")) {
-                text = text.substring(0, text.length() - 2);
-            }
-            return text;
-        }
-        return object.toString();
-    }
 }

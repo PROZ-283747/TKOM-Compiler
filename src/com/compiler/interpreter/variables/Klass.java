@@ -1,24 +1,20 @@
 package com.compiler.interpreter.variables;
 
-import com.compiler.interpreter.Interpreter;
-
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class Klass extends Variable implements Callable {
+
+public class Klass extends Variable implements Gettable {
     final String name;
-    private Map<String, Function> methods = null;
+    public Map<String, Variable> properties;
 
-    public Klass(String name, Map<String, Function> methods) {
+    public Klass(String name) {
+        super.varType = VarType.Class;
+        super.value = this;
         this.name = name;
-        this.methods = methods;
-    }
-
-    public Function findMethod(Instance instance, String name) {
-        if (methods.containsKey(name)) {
-            //return methods.get(name).bind(instance);
-        }
-        return null;
+        this.properties = new HashMap<>();
     }
 
     @Override
@@ -26,42 +22,19 @@ public class Klass extends Variable implements Callable {
         return name;
     }
 
-    @Override
-    public Object call(Interpreter interpreter, List<Variable> arguments) {
-        Instance instance = new Instance(this);
-
-        Function initializer = methods.get("init");
-        if (initializer != null) {
-            //initializer.bind(instance).call(interpreter, arguments);
+    public Variable get(String name) {
+        if (properties.containsKey(name)) {
+            return properties.get(name);
         }
 
-        return instance;
+        return null;
     }
 
-    @Override
-    public int arity() {
-        Function initializer = methods.get("init");
-        if (initializer == null) return 0;
-        return initializer.arity();
+    public void set(String name, Variable value) {
+        properties.put(name, value);
     }
 
-    @Override
     public String getName() {
-        return null;
-    }
-
-    @Override
-    public List<Variable> getParams() {
-        return null;
-    }
-
-    @Override
-    public VarType getReturnType() {
-        return null;
-    }
-
-    @Override
-    public void addParam(Variable param) {
-
+        return name;
     }
 }

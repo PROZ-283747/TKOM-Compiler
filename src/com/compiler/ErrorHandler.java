@@ -9,6 +9,7 @@ public class ErrorHandler {
     public static int lexerErrorCount = 0;
     public static int parserErrorCount = 0;
     public static int interpreterErrorCount = 0;
+    public static int resolverErrorCount = 0;
 
     public void printToken(Token token){
         System.out.println("type: " + token.getType() + " \"" + token.getLexeme() + "\"" + " line: " + token.getLine() +" column: " + token.getColumn() + " signNumber: " + token.getSignNumber() );
@@ -32,7 +33,7 @@ public class ErrorHandler {
 
     public static void printResolverError(String msg, int line, int column){
         System.err.println(String.format("Error while resolving: " + msg + " Line: " + line + " Column: " + column));
-        //++resolverErrorCount;
+        ++resolverErrorCount;
     }
 
     public static void printNoErrorMsg(){
@@ -48,10 +49,21 @@ public class ErrorHandler {
             System.err.println(String.format("Oh no! While parsing %d error(s)have been found in your code :(. ", parserErrorCount));
             System.exit(1);
         }
+        if (resolverErrorCount > 0) {
+            System.err.println(String.format("Oh no! While resolving %d error(s) in your code :(. ", resolverErrorCount));
+            System.exit(1);
+        }
         if (interpreterErrorCount > 0) {
             System.err.println(String.format("Oh no! While interpreting %d error(s) in your code :(. ", interpreterErrorCount));
             System.exit(1);
         }
+    }
+
+    public static void resetErrors(){
+        lexerErrorCount = 0;
+        parserErrorCount = 0;
+        interpreterErrorCount = 0;
+        resolverErrorCount = 0;
     }
 
     public static void printLineWithError(String path, int line, int column, int signNumber){

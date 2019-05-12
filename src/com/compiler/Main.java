@@ -1,6 +1,5 @@
 package com.compiler;
 
-import com.compiler.interpreter.variables.Fraction;
 import com.compiler.lexer.*;
 import com.compiler.parser.*;
 import com.compiler.interpreter.*;

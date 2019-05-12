@@ -78,6 +78,19 @@ public class Parser {
         }
     }
 
+    private Statement classObjectDeclaration(){
+
+
+            Token name = previous();
+//        if (match(IDENTIFIER)) {
+//            // klasa
+//        }
+
+            consume(SEMICOLON, "Expect ';' after expression.");
+            return new Statement.Expression(new Expression.Variable(name));
+
+    }
+
     private Statement statement() {
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
@@ -353,8 +366,23 @@ public class Parser {
     private Expression call() {
         Expression expr = primary();
 
-        if (match(LEFT_PAREN)) {
-            expr = finishCall(expr);
+//        if (match(LEFT_PAREN)) {
+//            expr = finishCall(expr);
+//        }
+//        else if(match(DOT)){
+//            Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+//            expr = new Expr.Get(expr, name);
+//        }
+
+        while (true) {
+            if (match(LEFT_PAREN)) {
+                expr = finishCall(expr);
+            } else if (match(DOT)) {
+                Token name = consume(IDENTIFIER, "Expect property name after '.'.");
+                expr = new Expression.Get(expr, name);
+            } else {
+                break;
+            }
         }
         return expr;
     }
@@ -387,13 +415,6 @@ public class Parser {
         if (match(FRACTION, STRING, NULL)) {
             return new Expression.Literal(Token.tokenConverter(previous())); // returns Fraction or String
         }
-
-//        if (match(SUPER)) {
-//                Token keyword = previous();
-//                consume(DOT, "Expect '.' after 'super'.");
-//                Token method = consume(IDENTIFIER, "Expect superclass method name.");
-//                return new Expression.Super(keyword, method);
-//        }
 
         if (match(IDENTIFIER)) {
             return new Expression.Variable(previous());

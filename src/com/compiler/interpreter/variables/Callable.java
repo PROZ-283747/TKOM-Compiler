@@ -8,7 +8,7 @@ public interface Callable {
 
     int arity();
 
-    Object call(Interpreter interpreter, List<Variable> arguments);
+    Variable call(Interpreter interpreter, List<Variable> arguments);
 
     String getName();
 
