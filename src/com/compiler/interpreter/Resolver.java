@@ -128,7 +128,6 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         }
 
         endScope();
-
         currentClass = enclosingClass;
 
         return null;

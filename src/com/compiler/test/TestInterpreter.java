@@ -128,6 +128,47 @@ public class TestInterpreter {
 
     }
 
+    @Test
+    public void testCase10() {
+        String code = "fraction a";
+        String expectedOutput = "";
+        String expectedErrors = "Error while parsing at line 0 column 0: Expect ';' after variable declaration.";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase11() {
+        String code = "fraction double(fraction s){\n" +
+                "\tprint(s*2);\n" +
+                "}";
+        String expectedOutput = "";
+        String expectedErrors = "Error while resolving: Last statement in function must be a return statement. Line: 0 Column: 0";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase12() {
+        String code = "fraction container[] = {1%4, 5%2, -3, \"string\"};";
+        String expectedOutput = "";
+        String expectedErrors = "Error while resolving: All elements in a container must be the same type as container. Line: 0 Column: 0";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase13() {
+        String code = "fraction double(fraction s){\n" +
+                "\tprint(s*2);\n" +
+                "return \"string\";" +
+                "}";
+        String expectedOutput = "";
+        String expectedErrors = "Error while resolving: Incorrect return type. Line: 0 Column: 0";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
 
     private static final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private static final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
@@ -137,21 +178,18 @@ public class TestInterpreter {
 
     @BeforeAll
     static void setUpStreams() {
-        System.out.println("Before all");
         System.setOut(new PrintStream(outContent));
         System.setErr(new PrintStream(errContent));
     }
 
     @AfterAll
     static void restoreStreams() {
-        System.out.println("After all");
         System.setOut(originalOut);
         System.setErr(originalErr);
     }
 
     @BeforeEach
     void resetStreams() {
-        System.out.println("Before each");
         outContent.reset();
         errContent.reset();
         ErrorHandler.resetErrors();
@@ -171,18 +209,11 @@ public class TestInterpreter {
 
         List<Statement> statements = parser.parse();
 
-        errorHandler.stopIfError();
-
         Interpreter interpreter = new Interpreter();
         Resolver resolver = new Resolver(interpreter);
 
         resolver.resolve(statements);
-        ErrorHandler.stopIfError();
-
         interpreter.interpret(statements);
-        ErrorHandler.stopIfError();
-
-//        errorHandler.printNoErrorMsg();
 
         assertEquals(removeNewLine(expectedOutput.trim()), removeNewLine(outContent.toString().trim()));
         assertEquals(removeNewLine(expectedErrors.trim()), removeNewLine(errContent.toString().trim()));

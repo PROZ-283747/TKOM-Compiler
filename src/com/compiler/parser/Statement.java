@@ -29,9 +29,8 @@ public abstract class Statement {
         public final List<Statement> statements;
     }
     public static class Class extends Statement {
-        Class(Token name, com.compiler.parser.Expression superclass, List<Statement> body) {
+        Class(Token name, List<Statement> body) {
             this.name = name;
-            this.superclass = superclass;
             this.body = body;
         }
 
@@ -40,7 +39,6 @@ public abstract class Statement {
         }
 
         public final Token name;
-        public final com.compiler.parser.Expression superclass;
         public final List<Statement> body;
     }
 

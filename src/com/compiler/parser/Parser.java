@@ -40,6 +40,7 @@ public class Parser {
         try {
             if (match(CLASS)) return classDeclaration();
             if (match(VOID_T, FRACTION_T, STRING_T)) return funcOrVarDeclaration();
+            // todo: klass objects
 
             return statement();
         } catch (ParseError error) {
@@ -51,16 +52,10 @@ public class Parser {
     private Statement classDeclaration() {
         Token name = consume(IDENTIFIER, "Expect class name.");
 
-        Expression superclass = null;
-        if (match(COLON)) {
-            consume(IDENTIFIER, "Expect superclass name.");
-            superclass = new Expression.Variable(previous());
-        }
-
         consume(LEFT_BRACKET, "Expect '{' before class body.");
 
         List<Statement> body = block();
-        return new Statement.Class(name, superclass, body);
+        return new Statement.Class(name, body);
     }
 
     private Statement funcOrVarDeclaration(){
@@ -78,20 +73,10 @@ public class Parser {
         }
     }
 
-    private Statement classObjectDeclaration(){
-
-
-            Token name = previous();
-//        if (match(IDENTIFIER)) {
-//            // klasa
-//        }
-
-            consume(SEMICOLON, "Expect ';' after expression.");
-            return new Statement.Expression(new Expression.Variable(name));
-
-    }
-
     private Statement statement() {
+        // if forStatement();
+        // return
+
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
         if (match(RETURN)) return returnStatement();
@@ -358,21 +343,13 @@ public class Parser {
             Expression right = unary();
             return new Expression.Unary(operator, right);
         }
-
+        // wyłuskanie lub call
         return call();
     }
 
     // when '(' and it is not grouping
     private Expression call() {
         Expression expr = primary();
-
-//        if (match(LEFT_PAREN)) {
-//            expr = finishCall(expr);
-//        }
-//        else if(match(DOT)){
-//            Token name = consume(IDENTIFIER, "Expect property name after '.'.");
-//            expr = new Expr.Get(expr, name);
-//        }
 
         while (true) {
             if (match(LEFT_PAREN)) {
@@ -395,11 +372,10 @@ public class Parser {
                 if (arguments.size() >= 20) {
                     error(peek(), "Cannot have more than 20 arguments.");
                 }
-                // todo: check if not null
-//                Expression expr = expression();
-//                if(expr != null)
-//                    arguments.add(expr);
-                arguments.add(expression());
+                Expression expr = expression();
+                if(expr != null)
+                    arguments.add(expr);
+                //arguments.add(expression()); // alternative way
             } while (match(COMMA));
         }
 
@@ -428,6 +404,7 @@ public class Parser {
 
         throw error(peek(), "(in primary())Expect expression.");
     }
+
 
     private boolean match(TokenType... types) {
         for (TokenType type : types) {

@@ -46,9 +46,6 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
     private Environment environment = globals;
 
     public static boolean isTrue(Object object) {
-//        if (object == null) return false;
-//        if (object instanceof Boolean) return (boolean)object;
-//        return true;
         return (boolean) object;
     }
 
