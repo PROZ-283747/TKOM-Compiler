@@ -4,6 +4,7 @@ import com.compiler.ErrorHandler;
 import com.compiler.lexer.Lexer;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,16 +28,20 @@ public class Parser {
             statements.add(declaration());
         }
 
-            return statements;
+        return statements;
     }
 
     private Statement declaration() {
         try {
-            if (match(CLASS)) return classDeclaration();
-            if (match(VOID_T, FRACTION_T, STRING_T)) return funcOrVarDeclaration();
-            if (match(IDENTIFIER)) return classObject();
+            currentStatement = classDeclaration();
+            if(currentStatement != null) return currentStatement;
+            currentStatement = funcOrVarDeclaration();
+            if(currentStatement != null) return currentStatement;
 
+//            if (match(CLASS)) return classDeclaration();
+//            if (match(VOID_T, FRACTION_T, STRING_T)) return funcOrVarDeclaration();
             return statement();
+
         } catch (ParseError error) {
             synchronize();
             return null;
@@ -44,33 +49,34 @@ public class Parser {
     }
 
     private Statement classDeclaration() {
+        if(match(CLASS)== false) return null;
         Token name = consume(IDENTIFIER, "Expect class name.");
 
-        consume(LEFT_BRACKET, "Expect '{' before class body.");
+        //consume(LEFT_BRACKET, "Expect '{' before class body.");
 
         List<Statement> body = block();
         return new Statement.Class(name, body);
     }
 
     private Statement funcOrVarDeclaration(){
+        if((match(VOID_T, FRACTION_T, STRING_T)==false)) return null;
         Token type = previous();
         Token name = consume(IDENTIFIER, "Expect function's or variable's name.");
 
-        if(match(LEFT_PAREN)){
-            return function("function", type, name);
-        }
-        else if(match(LEFT_SQUARE_BRACKET)){
-            return containerDefinition(type, name);
-        }
-        else{
-            return varDeclarationAndDefinition(type, name);
-        }
-    }
-
-    private Statement classObject(){
-//        currentStatement = call();
+        currentStatement = function("function", type, name);
         if(currentStatement != null) return currentStatement;
-        return null;
+        currentStatement = containerDefinition(type, name);
+        if(currentStatement != null) return currentStatement;
+        else return varDeclarationAndDefinition(type, name);
+//        if(match(LEFT_PAREN)){
+//            return function("function", type, name);
+//        }
+//        else if(match(LEFT_SQUARE_BRACKET)){
+//            return containerDefinition(type, name);
+//        }
+//        else{
+//            return varDeclarationAndDefinition(type, name);
+//        }
     }
 
     private Statement statement() {
@@ -100,6 +106,7 @@ public class Parser {
     }
 
     private Statement forStatement() {
+        if(match(FOR)== false) return null;
         consume(LEFT_PAREN, "Expect '(' after 'for'.");
 
         Token type = null;
@@ -121,6 +128,7 @@ public class Parser {
     }
 
     private Statement.Function function(String kind, Token type, Token name) {
+        if(match(LEFT_PAREN)==false) return null;
         List<Statement.Var> parameters = new ArrayList<>();
         if (!check(RIGHT_PAREN)) {
             do {
@@ -147,6 +155,7 @@ public class Parser {
     }
 
     private Statement ifStatement() {
+        if (match(IF)==false) return null;
         Token ifToken = previous();
         consume(LEFT_PAREN, "Expect '(' after 'if'.");
         Expression condition = expression();
@@ -165,6 +174,7 @@ public class Parser {
     }
 
     private Statement printStatement() {
+        if (match(PRINT)==false) return null;
         Token print = previous();
         consume(LEFT_PAREN, "Expect '(' after 'if'.");
 
@@ -182,6 +192,7 @@ public class Parser {
     }
 
     private Statement returnStatement() {
+        if (match(RETURN)==false) return null;
         Token keyword = previous();
         Expression value = null;
         if (!check(SEMICOLON)) {
@@ -193,6 +204,7 @@ public class Parser {
     }
 
     private List<Statement> block() {
+        if (match(LEFT_BRACKET)==false) return null;
         List<Statement> statements = new ArrayList<>();
 
         while (!check(RIGHT_BRACKET) && !isAtEnd()) {
@@ -220,26 +232,27 @@ public class Parser {
     }
 
     private Statement containerDefinition(Token type, Token name) {
+        if(match(LEFT_SQUARE_BRACKET)==false) return null;
+        consume(RIGHT_SQUARE_BRACKET, "Expect right square bracket.");
+        consume(EQUAL, "Expect right square bracket.");
+        consume(LEFT_BRACKET, "Expect left bracket in container initialization list.");
 
-            consume(RIGHT_SQUARE_BRACKET, "Expect right square bracket.");
-            consume(EQUAL, "Expect right square bracket.");
-            consume(LEFT_BRACKET, "Expect left bracket in container initialization list.");
-
-            List<Expression> containerElements = new ArrayList<>();
-            if (!check(RIGHT_BRACKET)) {
-                do {
-                    if (containerElements.size() >= 20) {
-                        error(peek(), "Container cannot have more than 20 elements");
-                    }
-                    containerElements.add(expression());
-                } while (match(COMMA));
-            }
-            consume(RIGHT_BRACKET, "Expect right bracket in container initialization list.");
-            consume(SEMICOLON, "Expect ';' after variable declaration.");
+        List<Expression> containerElements = new ArrayList<>();
+        if (!check(RIGHT_BRACKET)) {
+            do {
+                if (containerElements.size() >= 20) {
+                    error(peek(), "Container cannot have more than 20 elements");
+                }
+                containerElements.add(expression());
+            } while (match(COMMA));
+        }
+        consume(RIGHT_BRACKET, "Expect right bracket in container initialization list.");
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
         return new Statement.Container(type, name, containerElements);
     }
 
     private Statement whileStatement() {
+        if (match(WHILE)==false) return null;
         Token whileToken = previous();
         consume(LEFT_PAREN, "Expect '(' after 'while'.");
         Expression condition = expression();
