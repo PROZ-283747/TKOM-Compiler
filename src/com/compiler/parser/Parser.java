@@ -4,10 +4,8 @@ import com.compiler.ErrorHandler;
 import com.compiler.lexer.Lexer;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static com.compiler.lexer.TokenType.*;
 
 
@@ -27,7 +25,6 @@ public class Parser {
         while (!isAtEnd()) {
             statements.add(declaration());
         }
-
         return statements;
     }
 
@@ -52,7 +49,7 @@ public class Parser {
         if(match(CLASS)== false) return null;
         Token name = consume(IDENTIFIER, "Expect class name.");
 
-        //consume(LEFT_BRACKET, "Expect '{' before class body.");
+        consume(LEFT_BRACKET, "Expect '{' before class body.");
 
         List<Statement> body = block();
         return new Statement.Class(name, body);
@@ -148,7 +145,7 @@ public class Parser {
         }
         consume(RIGHT_PAREN, "Expect ')' after parameters.");
 
-        consume(LEFT_BRACKET, "Expect '{' before " + kind + " body.");
+        //consume(LEFT_BRACKET, "Expect '{' before " + kind + " body.");
         List<Statement> body = block();
 
         return new Statement.Function(name, type, parameters, body);
