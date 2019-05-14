@@ -4,7 +4,6 @@ import com.compiler.ErrorHandler;
 import com.compiler.lexer.Lexer;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +14,7 @@ public class Parser {
     private static class ParseError extends RuntimeException {}
 
     private Lexer lexer;
+    private Statement currentStatement;
 
     public Parser(Lexer lexer) {
         this.lexer = lexer;
@@ -23,12 +23,6 @@ public class Parser {
     public List<Statement> parse() {
         List<Statement> statements = new ArrayList<>();
 
-        //todo: while((newDeclaration = declaration()) != null)
-//        Statement stmt = declaration();
-//        while(stmt != null && !isAtEnd()){
-//            statements.add(stmt);
-//            stmt = declaration(); // TODO: isAtEnd is set
-//        }
         while (!isAtEnd()) {
             statements.add(declaration());
         }
@@ -40,7 +34,7 @@ public class Parser {
         try {
             if (match(CLASS)) return classDeclaration();
             if (match(VOID_T, FRACTION_T, STRING_T)) return funcOrVarDeclaration();
-            // todo: klass objects
+            if (match(IDENTIFIER)) return classObject();
 
             return statement();
         } catch (ParseError error) {
@@ -73,18 +67,36 @@ public class Parser {
         }
     }
 
-    private Statement statement() {
-        // if forStatement();
-        // return
+    private Statement classObject(){
+//        currentStatement = call();
+        if(currentStatement != null) return currentStatement;
+        return null;
+    }
 
-        if (match(FOR)) return forStatement();
-        if (match(IF)) return ifStatement();
-        if (match(RETURN)) return returnStatement();
-        if (match(WHILE)) return whileStatement();
-        if (match(LEFT_BRACKET)) return new Statement.Block(block());
-        if (match(PRINT)) return printStatement();
+    private Statement statement() {
+        currentStatement = forStatement();
+        if(currentStatement != null) return currentStatement;
+        currentStatement = ifStatement();
+        if(currentStatement != null) return currentStatement;
+        currentStatement = returnStatement();
+        if(currentStatement != null) return currentStatement;
+        currentStatement = whileStatement();
+        if(currentStatement != null) return currentStatement;
+        currentStatement = new Statement.Block(block());
+        if(currentStatement != null) return currentStatement;
+        currentStatement = printStatement();
+        if(currentStatement != null) return currentStatement;
 
         return expressionStatement();
+
+//        if (match(FOR)) return forStatement();
+//        if (match(IF)) return ifStatement();
+//        if (match(RETURN)) return returnStatement();
+//        if (match(WHILE)) return whileStatement();
+//        if (match(LEFT_BRACKET)) return new Statement.Block(block());
+//        if (match(PRINT)) return printStatement();
+//
+//        return expressionStatement();
     }
 
     private Statement forStatement() {
