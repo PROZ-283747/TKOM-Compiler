@@ -115,7 +115,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     @Override
     public Void visitClassStmt(Statement.Class stmt) {
         Klass enclosingClass = currentClass;
-        currentClass = new Klass(stmt.name.getLexeme());
+        currentClass = new Klass(stmt.name.getLexeme(), stmt.body);
 
         declare(stmt.name, currentClass);
         define(stmt.name);
@@ -124,6 +124,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
         resolve(stmt.body);
         for (Map.Entry<String, Variable> entry : scopes.peek().entrySet()) {
+            System.out.println("KEy: " + entry.getKey() + " VALUE: " + entry.getValue());
             currentClass.set(entry.getKey(), entry.getValue());
         }
 
@@ -150,21 +151,53 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
     @Override
     public Variable visitGetExpr(Expression.Get expr){
+        System.out.println("GET EXPRESSION");
         Variable gettable = resolve(expr.object);
-
+        System.out.println("gettable name: " + expr.name.getLexeme());
         if (gettable instanceof Gettable){
             Variable var = ((Gettable) gettable).get(expr.name.getLexeme());
 
             if (var == null) {
-                //Main.error("'" + ((Gettable) gettable).getName() + "' doesn't have '" + expr.name.getLexeme() + "' property.", expr.name.getLine(), expr.name.getColumn());
+                ErrorHandler.printResolverError("'" + ((Gettable) gettable).getName() + "' doesn't have '" + expr.name.getLexeme() + "' property.", expr.name.getLine(), expr.name.getColumn());
                 return new Variable();
             }
             return var;
         } else {
-            //Main.error("This item is not gettable.", expr.name.getLine(), expr.name.getColumn());
+            ErrorHandler.printResolverError("This item is not gettable.", expr.name.getLine(), expr.name.getColumn());
         }
 
         return new Variable();
+    }
+
+    @Override
+    public Variable visitSetExpr(Expression.Set expr) {
+        Variable right = resolve(expr.value);
+        Variable gettable = resolve(expr.object);
+
+        if (gettable instanceof Gettable) {
+            Variable var = ((Gettable) gettable).get(expr.name.getLexeme());
+
+            if (var == null) {
+                ErrorHandler.printResolverError("'" + ((Gettable) gettable).getName() + "' doesn't have '" +
+                                expr.name.getLexeme() + "' property.",
+                        expr.name.getLine(), expr.name.getColumn());
+
+                return new Variable();
+            }
+
+            if (var.varType != right.varType) {
+                ErrorHandler.printResolverError("Incompatible type of value.",
+                        expr.name.getLine(), expr.name.getColumn());
+            }
+
+            return var;
+        } else {
+            ErrorHandler.printResolverError("This item is not gettable.",
+                    expr.name.getLine(), expr.name.getColumn());
+        }
+
+        return right;
+
     }
 
     @Override
@@ -173,8 +206,6 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         Variable left = resolveVariable(expr, expr.name);
 
         if (left.varType != right.varType) {
-            // todo: always fraction i bool types !!! WHY
-            System.out.println(left.varType + " " +  right.varType);
             ErrorHandler.printResolverError("Incompatible type of value.",expr.name.getLine(), expr.name.getColumn());
         }
         return right;
@@ -191,7 +222,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     @Override
     public Variable visitCallExpr(Expression.Call expr) {
         Variable callee = resolve(expr.callee);
-
+        System.out.println("CALL: " + expr.callee);
+        //resolveVariable(callee,);
         if (!(callee instanceof Callable)) {
             ErrorHandler.printResolverError("This is not callable.", expr.paren.getLine(), expr.paren.getColumn());
             return new Variable();
@@ -464,6 +496,22 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
             }
         }
         define(stmt.name);
+        return null;
+    }
+
+    @Override
+    public Void visitClassObjectDefinitionStmt(Statement.ClassObject stmt) {
+        declare(stmt.objectName, null);
+        Variable baseClass = resolve(stmt.className);
+
+        if (!(baseClass instanceof Klass)) {
+            ErrorHandler.printResolverError("Class object must initialized with class definition.",
+                    stmt.objectName.getLine(), stmt.objectName.getColumn());
+        } else {
+            scopes.peek().put(stmt.objectName.getLexeme(), baseClass);
+        }
+
+        define(stmt.objectName);
         return null;
     }
 

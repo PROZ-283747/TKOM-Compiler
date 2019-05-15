@@ -4,7 +4,6 @@ import com.compiler.ErrorHandler;
 import com.compiler.lexer.Lexer;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,16 +22,9 @@ public class Parser {
     public List<Statement> parse() {
         List<Statement> statements = new ArrayList<>();
 
-        //todo: while((newDeclaration = declaration()) != null)
-//        Statement stmt = declaration();
-//        while(stmt != null && !isAtEnd()){
-//            statements.add(stmt);
-//            stmt = declaration(); // TODO: isAtEnd is set
-//        }
         while (!isAtEnd()) {
             statements.add(declaration());
         }
-
             return statements;
     }
 
@@ -40,7 +32,7 @@ public class Parser {
         try {
             if (match(CLASS)) return classDeclaration();
             if (match(VOID_T, FRACTION_T, STRING_T)) return funcOrVarDeclaration();
-            // todo: klass objects
+            if (match(OBJECT)) return classObject();
 
             return statement();
         } catch (ParseError error) {
@@ -73,9 +65,20 @@ public class Parser {
         }
     }
 
+    private Statement classObject(){
+        Token objectName = consume(IDENTIFIER, "Expect class object name.");
+        consume(EQUAL,"Expect assignment of class name while creating of class object.");
+        consume(NEW, "Expect 'new' while creating class object.");
+
+        Token classNameToken = consume(IDENTIFIER, "Expect class name after new while creating class object.");
+        Expression.Variable className = new Expression.Variable(classNameToken);
+
+        consume(SEMICOLON, "Expect semicolon at the end of class object creation.");
+
+        return new Statement.ClassObject(objectName, className);
+    }
+
     private Statement statement() {
-        // if forStatement();
-        // return
 
         if (match(FOR)) return forStatement();
         if (match(IF)) return ifStatement();
@@ -257,6 +260,9 @@ public class Parser {
             if (expr instanceof Expression.Variable) {
                 Token name = ((Expression.Variable)expr).name;
                 return new Expression.Assign(name, value);
+            } else if (expr instanceof Expression.Get) {
+                Expression.Get get = (Expression.Get)expr;
+                return new Expression.Set(get.object, get.name, value);
             }
 
             error(equals, "Invalid assignment target.");
@@ -351,14 +357,12 @@ public class Parser {
     private Expression call() {
         Expression expr = primary();
 
-        while (true) {
-            if (match(LEFT_PAREN)) {
+        while (match(LEFT_PAREN, DOT)) {
+            if ((previous().type).equals(LEFT_PAREN)) {
                 expr = finishCall(expr);
-            } else if (match(DOT)) {
+            } else if ((previous().type).equals(DOT)) {
                 Token name = consume(IDENTIFIER, "Expect property name after '.'.");
                 expr = new Expression.Get(expr, name);
-            } else {
-                break;
             }
         }
         return expr;

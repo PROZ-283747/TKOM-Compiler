@@ -3,10 +3,11 @@ package com.compiler.lexer;
 import com.compiler.interpreter.variables.Fraction;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 
-public class Token {
+public class Token implements Serializable {
 
     public final TokenType type;
     public final String lexeme;

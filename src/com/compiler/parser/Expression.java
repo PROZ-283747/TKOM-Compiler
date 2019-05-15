@@ -3,9 +3,10 @@ package com.compiler.parser;
 
 import com.compiler.lexer.Token;
 
+import java.io.Serializable;
 import java.util.List;
 
-public abstract class Expression {
+public abstract class Expression implements Serializable {
     public abstract <R> R accept(Visitor<R> visitor);
 
     public interface Visitor<R> {
@@ -18,6 +19,7 @@ public abstract class Expression {
         R visitUnaryExpr(Unary expr);
         R visitVariableExpr(Variable expr);
         R visitGetExpr(Get expr);
+        R visitSetExpr(Set set);
     }
 
     public static class Assign extends Expression {
@@ -144,5 +146,21 @@ public abstract class Expression {
 
         public final Expression object;
         public final Token name;
+    }
+
+    public static class Set extends Expression {
+        Set(Expression object, Token name, Expression value) {
+            this.object = object;
+            this.name = name;
+            this.value = value;
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitSetExpr(this);
+        }
+
+        public final Expression object;
+        public final Token name;
+        public final Expression value;
     }
 }

@@ -7,6 +7,8 @@ import com.compiler.lexer.TokenType;
 import com.compiler.parser.Expression;
 import com.compiler.parser.Statement;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
 
@@ -95,15 +97,7 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
 
     @Override
     public Void visitClassStmt(Statement.Class stmt) {
-
-        environment.define(stmt.name.getLexeme(), null);
-        Environment env = new Environment(environment);
-        executeBlock(stmt.body, env);
-
-        Klass klass = new Klass(stmt.name.getLexeme());
-        klass.properties = env.values;
-
-        environment.assign(stmt.name, klass);
+        environment.define(stmt.name.getLexeme(), new Klass(stmt.name.getLexeme(), stmt.body));
         return null;
     }
 
@@ -205,9 +199,23 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
     }
 
     @Override
+    public Void visitClassObjectDefinitionStmt(Statement.ClassObject stmt) {
+        environment.define(stmt.objectName.lexeme, null);
+        Klass baseKlass = (Klass) evaluate(stmt.className);
+
+        Environment env = new Environment(environment);
+        executeBlock(baseKlass.body, env);
+
+        KlassInstance klass = new KlassInstance(stmt.objectName.getLexeme(), env);
+
+        environment.assign(stmt.objectName.getLexeme(), klass);
+        return null;
+    }
+
+    @Override
     public Variable visitAssignExpr(Expression.Assign expr) {
         Variable value = evaluate(expr.value);
-        environment.assign(expr.name, value);
+        environment.assign(expr.name.getLexeme(), value);
 
         return value;
     }
@@ -250,12 +258,22 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
 
     @Override
     public Variable visitVariableExpr(Expression.Variable expr) {
-        return lookUpVariable(expr.name, expr);
+        return lookUpVariable(expr.name.getLexeme(), expr);
     }
 
     @Override
     public Variable visitGetExpr(Expression.Get expr) {
-        return null;
+        Gettable gettable = (Gettable) evaluate(expr.object);
+        return gettable.get(expr.name.getLexeme());
+    }
+
+    @Override
+    public Variable visitSetExpr(Expression.Set expr) {
+        Variable value = evaluate(expr.value);
+        Gettable object = (Gettable) evaluate(expr.object);
+
+        object.set(expr.name.getLexeme(), value);
+        return value;
     }
 
     @Override
@@ -265,10 +283,10 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
         return null;
     }
 
-    private Variable lookUpVariable(Token name, Expression expression) {
+    private Variable lookUpVariable(String name, Expression expression) {
         Integer distance = locals.get(expression);
         if (distance != null) {
-            return environment.getAt(distance, name.getLexeme());
+            return environment.getAt(distance, name);
         } else {
             return globals.get(name);
         }

@@ -36,6 +36,8 @@ public class Lexer{
         keywords.put("true", TokenType.TRUE);
         keywords.put("false", TokenType.FALSE);
         keywords.put("null", TokenType.NULL);
+        keywords.put("new", TokenType.NEW);
+        keywords.put("object", TokenType.OBJECT);
     }
 
     {

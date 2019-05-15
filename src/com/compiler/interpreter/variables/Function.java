@@ -46,7 +46,7 @@ public class Function extends Variable implements Callable {
 
         interpreter.executeBlock((List) declaration.parameters, environment);
         for (int i = 0; i < declaration.parameters.size(); i++) {
-            environment.assign(declaration.parameters.get(i).name, arguments.get(i));
+            environment.assign(declaration.parameters.get(i).name.getLexeme(), arguments.get(i));
         }
 
         try {

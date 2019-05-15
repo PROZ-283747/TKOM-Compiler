@@ -3,10 +3,11 @@ package com.compiler.interpreter;
 import com.compiler.interpreter.variables.Variable;
 import com.compiler.lexer.Token;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Environment {
+public class Environment implements Serializable {
     final Environment enclosing;
     final Map<String, Variable> values = new HashMap<>();
 
@@ -18,19 +19,19 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
-    public Variable get(Token name) {
-        if (values.containsKey(name.lexeme)) {
-            return values.get(name.lexeme);
+    public Variable get(String name) {
+        if (values.containsKey(name)) {
+            return values.get(name);
         }
 
         if (enclosing != null) return enclosing.get(name);
 
-        throw new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
+        throw new RuntimeError("Undefined variable '" + name + "'.");
     }
 
-    public void assign(Token name, Variable value) {
-        if (values.containsKey(name.getLexeme())) {
-            values.put(name.getLexeme(), value);
+    public void assign(String name, Variable value) {
+        if (values.containsKey(name)) {
+            values.put(name, value);
             return;
         }
 
@@ -39,7 +40,7 @@ public class Environment {
             return;
         }
 
-        throw new RuntimeError(name,"Undefined variable '" + name.getLexeme() + "'.");
+        throw new RuntimeError("Undefined variable '" + name + "'.");
     }
 
 

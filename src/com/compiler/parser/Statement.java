@@ -1,9 +1,11 @@
 package com.compiler.parser;
 
 import com.compiler.lexer.Token;
+
+import java.io.Serializable;
 import java.util.List;
 
-public abstract class Statement {
+public abstract class Statement implements Serializable {
     public interface Visitor<R> {
         R visitBlockStmt(Block stmt);
         R visitClassStmt(Class stmt);
@@ -15,7 +17,8 @@ public abstract class Statement {
         R visitVarStmt(Var stmt);
         R visitWhileStmt(While stmt);
         R visitForStmt(For stmt);
-        R visitContainerStmt(Container expr);
+        R visitContainerStmt(Container stmt);
+        R visitClassObjectDefinitionStmt(ClassObject stmt);
     }
     public static class Block extends Statement {
         Block(List<Statement> statements) {
@@ -182,5 +185,19 @@ public abstract class Statement {
         public final Token name;
         public final List<com.compiler.parser.Expression> elements;
     }
+
+    public static class ClassObject extends Statement{
+        ClassObject(Token objectName, com.compiler.parser.Expression className) {
+            this.objectName = objectName;
+            this.className = className;
+        }
+
+        public <R> R accept(Visitor<R> visitor) { return visitor.visitClassObjectDefinitionStmt(this); }
+
+        public final Token objectName;
+        public final com.compiler.parser.Expression className;
+    }
     public abstract <R> R accept(Visitor<R> visitor);
+
+
 }

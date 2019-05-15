@@ -49,6 +49,8 @@ public enum TokenType {
     TRUE,               // "true"
     PRINT,              // "print"
     NULL,               // "null"
+    NEW,                // "new"
+    OBJECT,             // "object"
 
     // Literals
     IDENTIFIER,         // eg. "myVariable"
