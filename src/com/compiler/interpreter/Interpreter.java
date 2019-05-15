@@ -302,32 +302,98 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
 
     @Override
     public Variable visitMultiplyExpr(Expression.Multiply expr) {
-        return null;
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(((Fraction)left.value).multiply((Fraction)right.value));
+        }
+
+        throw new NotImplementedException();
     }
 
     @Override
     public Variable visitDivideExpr(Expression.Divide expr) {
-        return null;
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(((Fraction)left.value).divide((Fraction)right.value));
+        }
+
+        throw new NotImplementedException();
     }
 
     @Override
     public Variable visitGreaterExpr(Expression.Greater expr) {
-        return null;
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(((Fraction)left.value).isGreater((Fraction)right.value));
+        }
+
+        throw new NotImplementedException();
     }
 
     @Override
     public Variable visitGreaterEqualExpr(Expression.GreaterEqual expr) {
-        return null;
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(((Fraction)left.value).isGreaterEqual((Fraction)right.value));
+        }
+
+        throw new NotImplementedException();
     }
 
     @Override
     public Variable visitLessExpr(Expression.Less expr) {
-        return null;
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(((Fraction)left.value).isLess((Fraction)right.value));
+        }
+
+        throw new NotImplementedException();
     }
 
     @Override
     public Variable visitLessEqualExpr(Expression.LessEqual expr) {
-        return null;
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(((Fraction)left.value).isLessEqual((Fraction)right.value));
+        }
+
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public Variable visitBangEqualExpr(Expression.BangEqual expr) {
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(!((Fraction)left.value).isEqual((Fraction)right.value));
+        }
+
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public Variable visitEqualEqualExpr(Expression.EqualEqual expr) {
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(((Fraction)left.value).isEqual((Fraction)right.value));
+        }
+
+        throw new NotImplementedException();
     }
 
     @Override

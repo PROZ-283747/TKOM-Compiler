@@ -29,6 +29,8 @@ public abstract class Expression implements Serializable {
         R visitGreaterEqualExpr(GreaterEqual expr);
         R visitLessExpr(Less expr);
         R visitLessEqualExpr(LessEqual expr);
+        R visitBangEqualExpr(BangEqual expr);
+        R visitEqualEqualExpr(EqualEqual expr);
     }
 
     public static class Assign extends Expression {
@@ -138,6 +140,26 @@ public abstract class Expression implements Serializable {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitLessEqualExpr(this);
+        }
+    }
+
+    public static class BangEqual extends Binary {
+        BangEqual(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitBangEqualExpr(this);
+        }
+    }
+
+    public static class EqualEqual extends Binary {
+        EqualEqual(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitEqualEqualExpr(this);
         }
     }
 

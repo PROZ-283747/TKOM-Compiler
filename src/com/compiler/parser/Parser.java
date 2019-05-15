@@ -303,7 +303,12 @@ public class Parser {
         while (match(BANG_EQUAL, EQUAL_EQUAL)) {
             Token operator = previous();
             Expression right = comparison();
-            expr = new Expression.Binary(expr, operator, right);
+            //expr = new Expression.Binary(expr, operator, right);
+            if(operator.type == BANG_EQUAL) {
+                expr = new Expression.BangEqual(expr, operator, right);
+            } else if(operator.type == EQUAL_EQUAL) {
+                expr = new Expression.EqualEqual(expr, operator, right);
+            }
         }
 
         return expr;

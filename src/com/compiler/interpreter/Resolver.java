@@ -229,32 +229,118 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
     @Override
     public Variable visitMultiplyExpr(Expression.Multiply expr) {
-        return null;
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+
+            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
+                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            }
+        }
+
+        return left;
     }
 
     @Override
     public Variable visitDivideExpr(Expression.Divide expr) {
-        return null;
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+
+            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
+                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            }
+        }
+
+        return left;
     }
 
     @Override
     public Variable visitGreaterExpr(Expression.Greater expr) {
-        return null;
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+
+            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
+                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            }
+        }
+
+        return new Variable(VarType.Bool, null);
     }
 
     @Override
     public Variable visitGreaterEqualExpr(Expression.GreaterEqual expr) {
-        return null;
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+
+            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
+                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            }
+        }
+
+        return new Variable(VarType.Bool, null);
     }
 
     @Override
     public Variable visitLessExpr(Expression.Less expr) {
-        return null;
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+
+            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
+                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            }
+        }
+
+        return new Variable(VarType.Bool, null);
     }
 
     @Override
     public Variable visitLessEqualExpr(Expression.LessEqual expr) {
-        return null;
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+
+            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
+                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            }
+        }
+
+        return new Variable(VarType.Bool, null);
+    }
+
+    @Override
+    public Variable visitBangEqualExpr(Expression.BangEqual expr) {
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Comparable operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+        }
+        return new Variable(VarType.Bool, null);
+    }
+
+    @Override
+    public Variable visitEqualEqualExpr(Expression.EqualEqual expr) {
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Comparable operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+        }
+        return new Variable(VarType.Bool, null);
     }
 
     @Override
