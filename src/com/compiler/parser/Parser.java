@@ -4,6 +4,8 @@ import com.compiler.ErrorHandler;
 import com.compiler.lexer.Lexer;
 import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -325,7 +327,13 @@ public class Parser {
         while (match(MINUS, PLUS)) {
             Token operator = previous();
             Expression right = multiplication();
-            expr = new Expression.Binary(expr, operator, right);
+
+            if(operator.type == MINUS) {
+                throw new NotImplementedException();
+//                expr = new Expression.Add(expr, operator, right);
+            } else if(operator.type == PLUS) {
+                expr = new Expression.Add(expr, operator, right);
+            }
         }
 
         return expr;

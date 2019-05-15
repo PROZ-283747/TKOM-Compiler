@@ -277,6 +277,21 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
     }
 
     @Override
+    public Variable visitAddExpr(Expression.Add expr) {
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(((Fraction)left.value).add((Fraction)right.value));
+        }
+        if (left.varType.equals(Variable.VarType.String)) {
+            return new Variable((String)left.value + right.value);
+        }
+
+        throw new NotImplementedException();
+    }
+
+    @Override
     public Void visitPrintStmt(Statement.Print stmt) {
         Variable variable = evaluate(stmt.expression);
         System.out.println(variable.value);

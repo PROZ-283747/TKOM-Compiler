@@ -201,6 +201,22 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     }
 
     @Override
+    public Variable visitAddExpr(Expression.Add expr) {
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+
+            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
+                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            }
+        }
+
+        return left;
+    }
+
+    @Override
     public Variable visitAssignExpr(Expression.Assign expr) {
         Variable right = resolve(expr.value);
         Variable left = resolveVariable(expr, expr.name);

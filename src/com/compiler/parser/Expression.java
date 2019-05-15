@@ -20,6 +20,8 @@ public abstract class Expression implements Serializable {
         R visitVariableExpr(Variable expr);
         R visitGetExpr(Get expr);
         R visitSetExpr(Set set);
+
+        R visitAddExpr(Add add);
     }
 
     public static class Assign extends Expression {
@@ -49,6 +51,16 @@ public abstract class Expression implements Serializable {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitBinaryExpr(this);
+        }
+    }
+
+    public static class Add extends Binary {
+        Add(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitAddExpr(this);
         }
     }
 

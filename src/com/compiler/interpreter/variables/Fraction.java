@@ -2,7 +2,7 @@ package com.compiler.interpreter.variables;
 
 import com.sun.javaws.exceptions.ErrorCodeResponseException;
 
-public class Fraction {
+public class Fraction extends Variable {
 
     int nominator;
     int denominator;
