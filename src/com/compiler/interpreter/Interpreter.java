@@ -2,13 +2,10 @@ package com.compiler.interpreter;
 
 import com.compiler.interpreter.variables.*;
 import com.compiler.interpreter.variables.Iterable;
-import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
 import com.compiler.parser.Expression;
 import com.compiler.parser.Statement;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
 
@@ -289,6 +286,48 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
         }
 
         throw new NotImplementedException();
+    }
+
+    @Override
+    public Variable visitSubtractExpr(Expression.Subtract expr) {
+        Variable left = evaluate(expr.left);
+        Variable right = evaluate(expr.right);
+
+        if (left.varType.equals(Variable.VarType.Fraction)) {
+            return new Variable(((Fraction)left.value).substract((Fraction)right.value));
+        }
+
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public Variable visitMultiplyExpr(Expression.Multiply expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitDivideExpr(Expression.Divide expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitGreaterExpr(Expression.Greater expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitGreaterEqualExpr(Expression.GreaterEqual expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitLessExpr(Expression.Less expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitLessEqualExpr(Expression.LessEqual expr) {
+        return null;
     }
 
     @Override

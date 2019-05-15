@@ -22,6 +22,13 @@ public abstract class Expression implements Serializable {
         R visitSetExpr(Set set);
 
         R visitAddExpr(Add add);
+        R visitSubtractExpr(Subtract expr);
+        R visitMultiplyExpr(Multiply expr);
+        R visitDivideExpr(Divide expr);
+        R visitGreaterExpr(Greater expr);
+        R visitGreaterEqualExpr(GreaterEqual expr);
+        R visitLessExpr(Less expr);
+        R visitLessEqualExpr(LessEqual expr);
     }
 
     public static class Assign extends Expression {
@@ -61,6 +68,76 @@ public abstract class Expression implements Serializable {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitAddExpr(this);
+        }
+    }
+
+    public static class Subtract extends Binary {
+        Subtract(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitSubtractExpr(this);
+        }
+    }
+
+    public static class Multiply extends Binary {
+        Multiply(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitMultiplyExpr(this);
+        }
+    }
+
+    public static class Divide extends Binary {
+        Divide(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitDivideExpr(this);
+        }
+    }
+
+    public static class Greater extends Binary {
+        Greater(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitGreaterExpr(this);
+        }
+    }
+
+    public static class GreaterEqual extends Binary {
+        GreaterEqual(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitGreaterEqualExpr(this);
+        }
+    }
+
+    public static class Less extends Binary {
+        Less(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitLessExpr(this);
+        }
+    }
+
+    public static class LessEqual extends Binary {
+        LessEqual(Expression left, Token operator, Expression right) {
+            super(left, operator, right);
+        }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitLessEqualExpr(this);
         }
     }
 

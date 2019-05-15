@@ -315,7 +315,16 @@ public class Parser {
         while (match(GREATER, GREATER_EQUAL, LESS, LESS_EQUAL)) {
             Token operator = previous();
             Expression right = addition();
-            expr = new Expression.Binary(expr, operator, right);
+
+            if(operator.type == GREATER) {
+                expr = new Expression.Greater(expr, operator, right);
+            } else if(operator.type == GREATER_EQUAL) {
+                expr = new Expression.GreaterEqual(expr, operator, right);
+            }else if(operator.type == LESS) {
+                expr = new Expression.Less(expr, operator, right);
+            } else if(operator.type == LESS_EQUAL) {
+                expr = new Expression.LessEqual(expr, operator, right);
+            }
         }
 
         return expr;
@@ -329,8 +338,7 @@ public class Parser {
             Expression right = multiplication();
 
             if(operator.type == MINUS) {
-                throw new NotImplementedException();
-//                expr = new Expression.Add(expr, operator, right);
+                expr = new Expression.Subtract(expr, operator, right);
             } else if(operator.type == PLUS) {
                 expr = new Expression.Add(expr, operator, right);
             }
@@ -345,7 +353,12 @@ public class Parser {
         while (match(SLASH, STAR)) {
             Token operator = previous();
             Expression right = unary();
-            expr = new Expression.Binary(expr, operator, right);
+
+            if(operator.type == SLASH) {
+                expr = new Expression.Divide(expr, operator, right);
+            } else if(operator.type == STAR) {
+                expr = new Expression.Multiply(expr, operator, right);
+            }
         }
 
         return expr;

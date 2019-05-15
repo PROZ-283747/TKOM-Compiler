@@ -106,9 +106,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
     @Override
     public Void visitBlockStmt(Statement.Block stmt) {
-        //beginScope();
         resolve(stmt.statements);
-        //endScope();
         return null;
     }
 
@@ -124,7 +122,6 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
         resolve(stmt.body);
         for (Map.Entry<String, Variable> entry : scopes.peek().entrySet()) {
-            System.out.println("KEy: " + entry.getKey() + " VALUE: " + entry.getValue());
             currentClass.set(entry.getKey(), entry.getValue());
         }
 
@@ -151,9 +148,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
     @Override
     public Variable visitGetExpr(Expression.Get expr){
-        System.out.println("GET EXPRESSION");
         Variable gettable = resolve(expr.object);
-        System.out.println("gettable name: " + expr.name.getLexeme());
         if (gettable instanceof Gettable){
             Variable var = ((Gettable) gettable).get(expr.name.getLexeme());
 
@@ -217,6 +212,52 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     }
 
     @Override
+    public Variable visitSubtractExpr(Expression.Subtract expr) {
+        Variable left = resolve(expr.left);
+        Variable right = resolve(expr.right);
+
+        if (left.varType != right.varType) {
+            ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
+
+            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
+                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            }
+        }
+
+        return left;
+    }
+
+    @Override
+    public Variable visitMultiplyExpr(Expression.Multiply expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitDivideExpr(Expression.Divide expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitGreaterExpr(Expression.Greater expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitGreaterEqualExpr(Expression.GreaterEqual expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitLessExpr(Expression.Less expr) {
+        return null;
+    }
+
+    @Override
+    public Variable visitLessEqualExpr(Expression.LessEqual expr) {
+        return null;
+    }
+
+    @Override
     public Variable visitAssignExpr(Expression.Assign expr) {
         Variable right = resolve(expr.value);
         Variable left = resolveVariable(expr, expr.name);
@@ -238,8 +279,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     @Override
     public Variable visitCallExpr(Expression.Call expr) {
         Variable callee = resolve(expr.callee);
-        System.out.println("CALL: " + expr.callee);
-        //resolveVariable(callee,);
+
         if (!(callee instanceof Callable)) {
             ErrorHandler.printResolverError("This is not callable.", expr.paren.getLine(), expr.paren.getColumn());
             return new Variable();
