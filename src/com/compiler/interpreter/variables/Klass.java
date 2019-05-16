@@ -16,18 +16,6 @@ public class Klass extends Variable implements Gettable, Cloneable, Serializable
     final String name;
     public Map<String, Variable> properties;
     public List<Statement> body;
-//
-//    Klass(Klass klass) {
-//        this.name = klass.name;
-//        super.varType = klass.varType;
-//        super.value = klass.value;
-//        super.defined = klass.defined;
-//
-//        properties = new HashMap<>();
-//        for(Map.Entry<String, Variable> entry : klass.properties.entrySet()) {
-//            properties.put(entry.getKey(), new Variable(entry.getValue()));
-//        }
-//    }
 
     public Klass(String name, List<Statement> body) {
         super.varType = VarType.Class;

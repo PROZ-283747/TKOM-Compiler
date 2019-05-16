@@ -25,7 +25,7 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
             }
         }
         catch (Exception error) {
-           throw error; // todo: modify!!!!
+           throw error;
         }
 
     }
@@ -69,7 +69,8 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
         return evaluate(expr.expression);
     }
 
-    public Variable evaluate(Expression expression) {
+    public Variable
+    evaluate(Expression expression) {
         return expression.accept(this);
     }
 
