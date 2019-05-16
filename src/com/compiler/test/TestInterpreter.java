@@ -169,6 +169,130 @@ public class TestInterpreter {
 
     }
 
+    @Test
+    public void testCase14() {
+        String code = "if(1 != 4){" +
+                "           print(\"Correct\");" +
+                "       }";
+        String expectedOutput = "Correct";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase15() {
+        String code = "class klasa{}" +
+                "object ob = new klasa;";
+        String expectedOutput = "";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase16() {
+        String code = "void printSth(string s){}";
+        String expectedOutput = "";
+        String expectedErrors = "Error while resolving: Expect statement in a function body. Line: 0 Column: 0";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase17() {
+        String code = "print(5%6 - 1%6);";
+        String expectedOutput = "2%3";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase18() {
+        String code = "class klasa{}" +
+                "      object ob = new klasa;";
+        String expectedOutput = "";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase19() {
+        String code = "class klasa{\n" +
+                "\tstring s = \"classString\";\n" +
+                "\tvoid printClass(){\n" +
+                "\t\tprint(s);\n" +
+                "\t}\n" +
+                "}" +
+                "object ob = new klasa;" +
+                "ob.printClass();" +
+                "ob.s = \"nowa wartosc\";" +
+                "ob.printClass();";
+        String expectedOutput = "classString\nnowa wartosc";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase20() {
+        String code = "class A{\n" +
+                "\tstring sA = \"classA\";\n" +
+                "\tvoid printClass(){\n" +
+                "\t\tprint(sA);\n" +
+                "\t}\n" +
+                "}\n" +
+                "\n" +
+                "class B{\n" +
+                "\tstring sB = \"classB\";\n" +
+                "\tvoid printClass(){\n" +
+                "\t\tprint(sB);\n" +
+                "\t}\n" +
+                "}" +
+                "object a = new A;" +
+                "object b = new B;" +
+                "a.printClass();" +
+                "a.sA = b.sB;" +
+                "a.printClass();";
+        String expectedOutput = "classA\nclassB";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase21() {
+        String code = "print(35%4 + 3*9)";
+        String expectedOutput = "";
+        String expectedErrors = "Error while parsing at line 0 column 0: Expect ';' after value.";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase22() {
+        String code = "print(35%4 + 3*9);";
+        String expectedOutput = "143%4";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
+    @Test
+    public void testCase23() {
+        String code = "if(1 >3){\n" +
+                "\tprint(\"if\");\n" +
+                "}else{\n" +
+                "\tprint(\"else\");\n" +
+                "}";
+        String expectedOutput = "else";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+
+    }
+
 
     private static final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
     private static final ByteArrayOutputStream errContent = new ByteArrayOutputStream();

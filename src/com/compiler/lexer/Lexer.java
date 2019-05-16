@@ -109,7 +109,6 @@ public class Lexer{
 
         if(c == (char) -1 || c == (char) 0x04){
             currentToken = new Token(TokenType.EOF, "", getLine(), getColumn(), getSignNumber());
-            //System.out.println(currentToken.toString());
             return;
         }
         Token token = functions.getOrDefault(c, () -> unexpCharError(c)).get();
@@ -120,7 +119,6 @@ public class Lexer{
             ErrorHandler.printLexerError("Invalid token.", token, null);
             ErrorHandler.stopIfError();
         }
-        //System.out.println(token.toString());
     }
 
     public Token getCurrentToken() {

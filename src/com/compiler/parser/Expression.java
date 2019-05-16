@@ -31,6 +31,8 @@ public abstract class Expression implements Serializable {
         R visitLessEqualExpr(LessEqual expr);
         R visitBangEqualExpr(BangEqual expr);
         R visitEqualEqualExpr(EqualEqual expr);
+        R visitBangUnaryExpr(BangUnary expr);
+        R visitMinusUnaryExpr(MinusUnary expr);
     }
 
     public static class Assign extends Expression {
@@ -230,6 +232,22 @@ public abstract class Expression implements Serializable {
 
         public <R> R accept(Visitor<R> visitor) {
             return visitor.visitUnaryExpr(this);
+        }
+    }
+
+    public static class BangUnary extends Unary {
+        BangUnary(Token operator, Expression right) {  super(operator,right); }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitBangUnaryExpr(this);
+        }
+    }
+
+    public static class MinusUnary extends Unary {
+        MinusUnary(Token operator, Expression right) {  super(operator,right); }
+
+        public <R> R accept(Visitor<R> visitor) {
+            return visitor.visitMinusUnaryExpr(this);
         }
     }
 

@@ -7,38 +7,8 @@ import com.compiler.parser.Expression;
 import com.compiler.parser.Statement;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.util.*;
-import java.util.function.BiFunction;
 
 public class Interpreter implements Expression.Visitor<Variable>, Statement.Visitor<Void> {
-    private static final Map<TokenType, BiFunction<Object, Object, Object>> binaryExprEvaluator = new HashMap<>();
-    private static final Map<TokenType, java.util.function.Function<Object, Object>> unaryExprEvaluator = new HashMap<>();
-
-    static {
-        binaryExprEvaluator.put(TokenType.GREATER, (l, r) -> ((Fraction)l).isGreater((Fraction)r));
-        binaryExprEvaluator.put(TokenType.GREATER_EQUAL, (l, r) -> ((Fraction)l).isGreaterEqual((Fraction)r));
-        binaryExprEvaluator.put(TokenType.LESS, (l, r) -> ((Fraction)l).isLess((Fraction)r));
-        binaryExprEvaluator.put(TokenType.LESS_EQUAL, (l, r) -> ((Fraction)l).isLessEqual((Fraction)r));
-        binaryExprEvaluator.put(TokenType.BANG_EQUAL, (l, r) -> !((Fraction)l).isEqual((Fraction)r));
-        binaryExprEvaluator.put(TokenType.EQUAL_EQUAL, (l, r) -> ((Fraction)l).isEqual((Fraction)r));
-        binaryExprEvaluator.put(TokenType.MINUS, (l, r) -> ((Fraction)l).substract((Fraction)r));
-        binaryExprEvaluator.put(TokenType.PLUS, (l, r) -> {
-            if (l instanceof Fraction) {
-                return ((Fraction)l).add((Fraction)r);
-            }
-            if (l instanceof String) {
-                return (String) l + r;
-            }
-            throw new NotImplementedException();
-            //throw new InterpretingException(new Token(TokenType.PLUS, "", null, 0, 0), "Addition not allowed.");
-        });
-        binaryExprEvaluator.put(TokenType.SLASH, (l, r) -> ((Fraction)l).divide((Fraction)r));
-        binaryExprEvaluator.put(TokenType.STAR, (l, r) -> ((Fraction)l).multiply((Fraction)r));
-    }
-
-    static {
-        unaryExprEvaluator.put(TokenType.BANG, (o) -> !isTrue(o));
-        unaryExprEvaluator.put(TokenType.MINUS, (o) -> ((Fraction)o).changeSign());
-    }
 
     private final Environment globals = new Environment();
     private final Map<Expression, Integer> locals = new HashMap<>();
@@ -46,10 +16,6 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
 
     public static boolean isTrue(Object object) {
         return (boolean) object;
-    }
-
-    private static boolean isEqual(Object a, Object b) {
-        return a.equals(b);
     }
 
     public void interpret(List<Statement> statements) {
@@ -219,11 +185,7 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
 
     @Override
     public Variable visitBinaryExpr(Expression.Binary expr) {
-        Variable left = evaluate(expr.left);
-        Variable right = evaluate(expr.right);
-
-        Object result = binaryExprEvaluator.get(expr.operator.getType()).apply(left.value, right.value);
-        return new Variable(result);
+        throw new NotImplementedException();
     }
 
     @Override
@@ -247,10 +209,20 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
 
     @Override
     public Variable visitUnaryExpr(Expression.Unary expr) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public Variable visitBangUnaryExpr(Expression.BangUnary expr) {
         Variable operand = evaluate(expr.right);
 
-        Object result = unaryExprEvaluator.get(expr.operator.getType()).apply(operand.value);
-        return new Variable(result);
+        return new Variable(!isTrue(operand.value));
+    }
+
+    @Override
+    public Variable visitMinusUnaryExpr(Expression.MinusUnary expr) {
+        Variable operand = evaluate(expr.right);
+        return new Variable(((Fraction)operand.value).changeSign());
     }
 
     @Override

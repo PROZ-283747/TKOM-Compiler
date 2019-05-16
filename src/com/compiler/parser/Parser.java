@@ -373,7 +373,13 @@ public class Parser {
         if (match(BANG, MINUS)) {
             Token operator = previous();
             Expression right = unary();
-            return new Expression.Unary(operator, right);
+
+            if(operator.type == BANG) {
+                return new Expression.BangUnary(operator, right);
+            } else if(operator.type == MINUS) {
+                return new Expression.MinusUnary(operator, right);
+            }
+            //return new Expression.Unary(operator, right);
         }
         // wyłuskanie lub call
         return call();

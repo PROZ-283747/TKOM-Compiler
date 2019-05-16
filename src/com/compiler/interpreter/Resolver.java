@@ -8,73 +8,12 @@ import com.compiler.lexer.Token;
 import com.compiler.lexer.TokenType;
 import com.compiler.parser.Expression;
 import com.compiler.parser.Statement;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.*;
 import java.util.function.BiFunction;
 
 public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor<Void> {
-    private static final Map<TokenType, TriFunction<Token, Variable, Variable, Variable>> binaryExprTypeChecker = new HashMap<>();
-    private static final Map<TokenType, BiFunction<Token, Variable, Variable>> unaryExprTypeChecker = new HashMap<>();
-
-    static {
-        binaryExprTypeChecker.put(TokenType.GREATER, (o, l, r) -> {
-            checkNumericOperands(o, l, r);
-            return new Variable(VarType.Bool, null);
-        });
-        binaryExprTypeChecker.put(TokenType.GREATER_EQUAL, (o, l, r) -> {
-            checkNumericOperands(o, l, r);
-            return new Variable(VarType.Bool, null);
-        });
-        binaryExprTypeChecker.put(TokenType.LESS, (o, l, r) -> {
-            checkNumericOperands(o, l, r);
-            return new Variable(VarType.Bool, null);
-        });
-        binaryExprTypeChecker.put(TokenType.LESS_EQUAL, (o, l, r) -> {
-            checkNumericOperands(o, l, r);
-            return new Variable(VarType.Bool, null);
-        });
-        binaryExprTypeChecker.put(TokenType.MINUS, (o, l, r) -> {
-            checkNumericOperands(o, l, r);
-            return l;
-        });
-        binaryExprTypeChecker.put(TokenType.PLUS, (o, l, r) -> {
-            checkNumericOperands(o, l, r);
-            return l;
-        });
-        binaryExprTypeChecker.put(TokenType.SLASH, (o, l, r) -> {
-            checkNumericOperands(o, l, r);
-            return l;
-        });
-        binaryExprTypeChecker.put(TokenType.STAR, (o, l, r) -> {
-            checkNumericOperands(o, l, r);
-            return l;
-        });
-        binaryExprTypeChecker.put(TokenType.BANG_EQUAL, (o, l, r) -> {
-            if (l.varType != r.varType) {
-                ErrorHandler.printResolverError("Comparable operands must be of the same type.", o.getLine(), o.getColumn());
-            }
-            return new Variable(VarType.Bool, null);
-        });
-        binaryExprTypeChecker.put(TokenType.EQUAL_EQUAL, (o, l, r) -> {
-            if (l.varType != r.varType) {
-                ErrorHandler.printResolverError("Comparable operands must be of the same type.", o.getLine(), o.getColumn());
-            }
-            return new Variable(VarType.Bool, null);
-        });
-    }
-
-    static {
-        unaryExprTypeChecker.put(TokenType.BANG, (o, t) -> {
-            if (t.varType != VarType.Bool) {
-                ErrorHandler.printResolverError("Operand must be a Bool.",o.getLine(), o.getColumn());
-            }
-            return new Variable(VarType.Bool, null);
-        });
-        unaryExprTypeChecker.put(TokenType.MINUS, (o, t) -> {
-            checkNumericOperand(o, t);
-            //return new Variable(VarType.Bool, null);
-            return t;
-        });
-    }
 
     private final Interpreter interpreter;
     private final Stack<Map<String, Variable>> scopes = new Stack<>();
@@ -84,18 +23,6 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     public Resolver(Interpreter interpreter) {
         beginScope();
         this.interpreter = interpreter;
-    }
-
-    private static void checkNumericOperand(Token operator, Variable operand) {
-        if (operand.varType != VarType.Fraction) {
-            ErrorHandler.printResolverError("Operand must be a number.",operator.getLine(), operator.getColumn());
-        }
-    }
-
-    private static void checkNumericOperands(Token operator, Variable left, Variable right) {
-        if (left.varType != VarType.Fraction || right.varType != VarType.Fraction) {
-            ErrorHandler.printResolverError("Operands must be numbers.",operator.getLine(), operator.getColumn());
-        }
     }
 
     public void resolve(List<Statement> statements) {
@@ -344,6 +271,24 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     }
 
     @Override
+    public Variable visitBangUnaryExpr(Expression.BangUnary expr) {
+        Variable operand = resolve(expr.right);
+        if (operand.varType != VarType.Fraction) {
+            ErrorHandler.printResolverError("Operand must be a number.",expr.operator.getLine(), expr.operator.getColumn());
+        }
+        return new Variable(VarType.Bool, null);
+    }
+
+    @Override
+    public Variable visitMinusUnaryExpr(Expression.MinusUnary expr) {
+        Variable operand = resolve(expr.right);
+        if (operand.varType != VarType.Fraction) {
+            ErrorHandler.printResolverError("Operand must be a number.",expr.operator.getLine(), expr.operator.getColumn());
+        }
+        return operand;
+    }
+
+    @Override
     public Variable visitAssignExpr(Expression.Assign expr) {
         Variable right = resolve(expr.value);
         Variable left = resolveVariable(expr, expr.name);
@@ -356,10 +301,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
     @Override
     public Variable visitBinaryExpr(Expression.Binary expr) {
-        Variable left = resolve(expr.left);
-        Variable right = resolve(expr.right);
-
-        return binaryExprTypeChecker.get(expr.operator.getType()).apply(expr.operator, left, right);
+        throw new NotImplementedException();
     }
 
     @Override
@@ -413,8 +355,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
     @Override
     public Variable visitUnaryExpr(Expression.Unary expr) {
-        Variable operand = resolve(expr.right);
-        return unaryExprTypeChecker.get(expr.operator.getType()).apply(expr.operator, operand);
+        throw new NotImplementedException();
     }
 
     @Override
@@ -655,10 +596,5 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
         define(stmt.objectName);
         return null;
-    }
-
-    @FunctionalInterface
-    interface TriFunction<T1, T2, T3, T4> {
-        T4 apply(T1 one, T2 two, T3 three);
     }
 }
