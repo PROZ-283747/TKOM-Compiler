@@ -26,14 +26,14 @@ public class ErrorHandler {
         ++parserErrorCount;
     }
 
-    public static void printInterpreterError(String msg, Token token){
-        System.err.println(String.format("Error while interpreting at line %d column %d: %s ", token.getLine(), token.getColumn(), msg));
-        ++interpreterErrorCount;
-    }
-
     public static void printResolverError(String msg, int line, int column){
         System.err.println(String.format("Error while resolving: " + msg + " Line: " + line + " Column: " + column));
         ++resolverErrorCount;
+    }
+
+    public static void printInterpreterError(String msg, Token token){
+        System.err.println(String.format("Error while interpreting at line %d column %d: %s ", token.getLine(), token.getColumn(), msg));
+        ++interpreterErrorCount;
     }
 
     public static void printNoErrorMsg(){
@@ -51,7 +51,7 @@ public class ErrorHandler {
         }
         if (resolverErrorCount > 0) {
             System.err.println(String.format("Oh no! While resolving %d error(s) in your code :(. ", resolverErrorCount));
-            System.exit(1);
+            System.exit(-1);
         }
         if (interpreterErrorCount > 0) {
             System.err.println(String.format("Oh no! While interpreting %d error(s) in your code :(. ", interpreterErrorCount));
@@ -59,11 +59,32 @@ public class ErrorHandler {
         }
     }
 
+    public static boolean isError(){
+        if(lexerErrorCount >0 || parserErrorCount >0 || resolverErrorCount >0)
+            return true;
+        return false;
+    }
     public static void resetErrors(){
         lexerErrorCount = 0;
         parserErrorCount = 0;
         interpreterErrorCount = 0;
         resolverErrorCount = 0;
+    }
+
+    public static int getLexerErrorCount() {
+        return lexerErrorCount;
+    }
+
+    public static int getParserErrorCount() {
+        return parserErrorCount;
+    }
+
+    public static int getInterpreterErrorCount() {
+        return interpreterErrorCount;
+    }
+
+    public static int getResolverErrorCount() {
+        return resolverErrorCount;
     }
 
     public static void printLineWithError(String path, int line, int column, int signNumber){

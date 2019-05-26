@@ -11,8 +11,8 @@ import java.util.*;
 public class Interpreter implements Expression.Visitor<Variable>, Statement.Visitor<Void> {
 
     private final Environment globals = new Environment();
-    private final Map<Expression, Integer> locals = new HashMap<>();
-    private Environment environment = globals;
+    private final Map<Expression, Integer> distances = new HashMap<>();
+    private Environment currentEnvironment = globals; // current
 
     public static boolean isTrue(Object object) {
         return (boolean) object;
@@ -36,7 +36,7 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
     }
 
     public void resolve(Expression expression, int depth) {
-        locals.put(expression, depth);
+        distances.put(expression, depth);
     }
 
     @Override
@@ -54,13 +54,13 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
 
     @Override
     public Void visitBlockStmt(Statement.Block stmt) {
-        executeBlock(stmt.statements, new Environment(environment));
+        executeBlock(stmt.statements, new Environment(currentEnvironment));
         return null;
     }
 
     @Override
     public Void visitClassStmt(Statement.Class stmt) {
-        environment.define(stmt.name.getLexeme(), new Klass(stmt.name.getLexeme(), stmt.body));
+        currentEnvironment.define(stmt.name.getLexeme(), new Klass(stmt.name.getLexeme(), stmt.body));
         return null;
     }
 
@@ -85,15 +85,15 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
     }
 
     public void executeBlock(List<Statement> statements, Environment environment) {
-        Environment previous = this.environment;
+        Environment previous = this.currentEnvironment;
         try {
-            this.environment = environment;
+            this.currentEnvironment = environment;
 
             for (Statement statement : statements) {
                 execute(statement);
             }
         } finally {
-            this.environment = previous;
+            this.currentEnvironment = previous;
         }
     }
 
@@ -122,7 +122,7 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
             value = evaluate(stmt.initializer);
         }
 
-        environment.define(stmt.name.getLexeme(), value);
+        currentEnvironment.define(stmt.name.getLexeme(), value);
         return null;
     }
 
@@ -139,11 +139,11 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
         Variable in = evaluate(stmt.container);
 
         for (Variable element : ((Iterable)in).getCollection().getElements()) {
-            environment = new Environment(environment);
+            currentEnvironment = new Environment(currentEnvironment);
 
-            environment.define(stmt.iter.getLexeme(), element);
-            executeBlock(((Statement.Block) stmt.body).statements, environment);
-            environment = environment.enclosing;
+            currentEnvironment.define(stmt.iter.getLexeme(), element);
+            executeBlock(((Statement.Block) stmt.body).statements, currentEnvironment);
+            currentEnvironment = currentEnvironment.enclosing;
         }
 
         return null;
@@ -158,28 +158,28 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
                 container.addElement(evaluate(elem));
             }
         }
-        environment.define(stmt.name.getLexeme(), container);
+        currentEnvironment.define(stmt.name.getLexeme(), container);
         return null;
     }
 
     @Override
     public Void visitClassObjectDefinitionStmt(Statement.ClassObject stmt) {
-        environment.define(stmt.objectName.lexeme, null);
+        currentEnvironment.define(stmt.objectName.lexeme, null);
         Klass baseKlass = (Klass) evaluate(stmt.className);
 
-        Environment env = new Environment(environment);
+        Environment env = new Environment(currentEnvironment);
         executeBlock(baseKlass.body, env);
 
         KlassInstance klass = new KlassInstance(stmt.objectName.getLexeme(), env);
 
-        environment.assign(stmt.objectName.getLexeme(), klass);
+        currentEnvironment.assign(stmt.objectName.getLexeme(), klass);
         return null;
     }
 
     @Override
     public Variable visitAssignExpr(Expression.Assign expr) {
         Variable value = evaluate(expr.value);
-        environment.assign(expr.name.getLexeme(), value);
+        currentEnvironment.assign(expr.name.getLexeme(), value);
 
         return value;
     }
@@ -203,8 +203,8 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
 
     @Override
     public Void visitFunctionStmt(Statement.Function stmt) {
-        Function function = new Function(stmt, environment);
-        environment.define(stmt.name.getLexeme(), function);
+        Function function = new Function(stmt, currentEnvironment);
+        currentEnvironment.define(stmt.name.getLexeme(), function);
         return null;
     }
 
@@ -372,14 +372,17 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
     @Override
     public Void visitPrintStmt(Statement.Print stmt) {
         Variable variable = evaluate(stmt.expression);
-        System.out.println(variable.value);
+        if(variable == null) //
+            System.out.println("null");
+        else
+            System.out.println(variable.value);
         return null;
     }
 
     private Variable lookUpVariable(String name, Expression expression) {
-        Integer distance = locals.get(expression);
+        Integer distance = distances.get(expression);
         if (distance != null) {
-            return environment.getAt(distance, name);
+            return currentEnvironment.getAt(distance, name);
         } else {
             return globals.get(name);
         }

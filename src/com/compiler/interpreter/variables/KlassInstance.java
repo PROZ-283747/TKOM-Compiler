@@ -1,10 +1,7 @@
 package com.compiler.interpreter.variables;
 
-
-import com.compiler.interpreter.DeepCopy;
 import com.compiler.interpreter.Environment;
 
-import java.util.Map;
 
 public class KlassInstance extends Variable implements Gettable {
     private final String name;

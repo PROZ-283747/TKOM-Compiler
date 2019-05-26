@@ -379,7 +379,6 @@ public class Parser {
             } else if(operator.type == MINUS) {
                 return new Expression.MinusUnary(operator, right);
             }
-            //return new Expression.Unary(operator, right);
         }
         // wyłuskanie lub call
         return call();

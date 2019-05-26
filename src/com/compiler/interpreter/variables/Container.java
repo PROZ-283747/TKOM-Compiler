@@ -13,20 +13,6 @@ public class Container extends Variable implements Iterable {
         this.elements = new LinkedList<>();
 
     }
-//    Container() {
-//        this.varType = VarType.Container;
-//        elements = new LinkedList<>();
-//    }
-//
-//    Container(List<Variable> elements) {
-//        this.varType = VarType.Container;
-//        this.elements = elements;
-//    }
-//
-//    public Container(List<Variable> elements, VarType type) {
-//        this.elements = elements;
-//        this.varType = type;
-//    }
 
     public boolean isEmpty() {
         return elements.isEmpty();

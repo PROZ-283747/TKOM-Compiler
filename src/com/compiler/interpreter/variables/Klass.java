@@ -1,15 +1,10 @@
 package com.compiler.interpreter.variables;
 
 import com.compiler.parser.Statement;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 public class Klass extends Variable implements Gettable, Cloneable, Serializable {

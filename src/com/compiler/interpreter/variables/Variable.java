@@ -1,13 +1,11 @@
 package com.compiler.interpreter.variables;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Variable implements Serializable {
+public class Variable {
     public VarType varType;
     public Object value;
     public boolean defined = false;
@@ -90,6 +88,11 @@ public class Variable implements Serializable {
         public String toString() {
             return this.name;
         }
+
+    }
+
+    public boolean isDefined(){
+        return defined;
     }
 }
 

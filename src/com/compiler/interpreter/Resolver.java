@@ -78,7 +78,6 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         Variable gettable = resolve(expr.object);
         if (gettable instanceof Gettable){
             Variable var = ((Gettable) gettable).get(expr.name.getLexeme());
-
             if (var == null) {
                 ErrorHandler.printResolverError("'" + ((Gettable) gettable).getName() + "' doesn't have '" + expr.name.getLexeme() + "' property.", expr.name.getLine(), expr.name.getColumn());
                 return new Variable();
@@ -98,7 +97,6 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
 
         if (gettable instanceof Gettable) {
             Variable var = ((Gettable) gettable).get(expr.name.getLexeme());
-
             if (var == null) {
                 ErrorHandler.printResolverError("'" + ((Gettable) gettable).getName() + "' doesn't have '" +
                                 expr.name.getLexeme() + "' property.",
@@ -533,9 +531,10 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
     @Override
     public Void visitPrintStmt(Statement.Print stmt) {
         Variable value = resolve(stmt.expression);
-        if (value.varType == VarType.Void) {
+        if (value.varType == VarType.Void || (value.varType == VarType.Function && ((Function)value).getReturnType() == VarType.Void)) {
             ErrorHandler.printResolverError("No value to print",stmt.print.getLine(), stmt.print.getColumn());
         }
+
         return null;
     }
 

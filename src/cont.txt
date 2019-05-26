@@ -1,11 +1,5 @@
-#komentarz
-fraction sum = 4%5;
-fraction s = sum + 5;
-string a;
-string b = "abc";
+fraction contener[] = {3%8, 7%4, 9%2};
 
-fraction fun(fraction f){
-	fraction a;
-	a = a * 7%4;
-	return a;
+for(Fraction i : contener){
+	print(i);
 }
