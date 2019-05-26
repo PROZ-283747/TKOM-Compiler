@@ -11,7 +11,6 @@ import org.junit.jupiter.api.*;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -125,12 +124,38 @@ public class TestInterpreter {
     }
 
     @Test
-    public void printContainerContent() {
+    public void containerContentWithFractions() {
         String code = "fraction container[] = {1%4, 5%2, -3};\n" +
                 "for( fraction i : container){\n" +
                 "\tprint(i);\n" +
                 "}";
         String expectedOutput = "1%4\n5%2\n-3%1";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+    }
+
+    @Test
+    public void incorrectIterType() {
+        String code = "string container1[] = {\"a\", \"b\", \"c\"};\n" +
+                "for( fraction i : container1){\n" +
+                "string a = i;" +
+                "print(a);" +
+                "}\n";
+
+        String expectedOutput = "";
+        String expectedErrors = "Error while resolving: Variable initializer is of different type than variable. Line: 0 Column: 0";
+        testInterpreter(code, expectedOutput, expectedErrors);
+    }
+
+    @Test
+    public void containerContentWithStrings() {
+        String code = "string container1[] = {\"a\", \"b\", \"c\"};\n" +
+                "for( string i : container1){\n" +
+                "string a = i;" +
+                "print(a);" +
+                "}\n";
+
+        String expectedOutput = "a\nb\nc";
         String expectedErrors = "";
         testInterpreter(code, expectedOutput, expectedErrors);
     }
@@ -351,6 +376,47 @@ public class TestInterpreter {
                 "print(c.fun());";
         String expectedOutput = "Funkcja\nFunkcja z klasy";
         String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+    }
+
+    @Test
+    public void assignFunctionCallToVar() {
+        String code = "fraction getFraction(){" +
+                "return 5%3;}" +
+                "fraction var = getFraction();" +
+                "print(var);";
+
+        String expectedOutput = "5%3";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+    }
+
+    @Test
+    public void funCallAsContainerElementAndFunArg() {
+        String code = "fraction getFraction(){\n" +
+                "return 5%3;}" +
+                "fraction fun(fraction arg){\n" +
+                "fraction c[]={arg};\n" +
+                "for(fraction i : c){\n" +
+                "print(i);\n" +
+                "}\n" +
+                "return 0;\n" +
+                "}\n" +
+                "fun(getFraction());";
+
+        String expectedOutput = "5%3";
+        String expectedErrors = "";
+        testInterpreter(code, expectedOutput, expectedErrors);
+    }
+
+    @Test
+    public void incorrectFunctionArgType() {
+        String code = "fraction fun(fraction arg){\n" +
+                "return 0;}\n" +
+                "fun(\"string\");";
+
+        String expectedOutput = "";
+        String expectedErrors = "Error while resolving: Incorrect type of argument number 1. Line: 0 Column: 0";
         testInterpreter(code, expectedOutput, expectedErrors);
     }
 

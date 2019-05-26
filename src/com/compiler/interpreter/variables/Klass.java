@@ -1,13 +1,12 @@
 package com.compiler.interpreter.variables;
 
 import com.compiler.parser.Statement;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-public class Klass extends Variable implements Gettable, Cloneable, Serializable {
+public class Klass extends Variable implements Gettable, Cloneable {
     final String name;
     public Map<String, Variable> properties;
     public List<Statement> body;

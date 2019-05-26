@@ -318,10 +318,10 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         }
 
         for (int i = 0; i < expr.arguments.size(); i++) {
-            Variable argType = resolve(expr.arguments.get(i));
+            Variable arg = resolve(expr.arguments.get(i));
             if (i < callable.arity()) {
-                Variable paramType = callable.getParams().get(i);
-                if (argType.varType != paramType.varType) {
+                Variable param = callable.getParams().get(i);
+                if ((arg.varType != param.varType && arg.varType != VarType.Function) || (arg.varType == VarType.Function && ((Function)arg).returnType != param.varType)) {
                     ErrorHandler.printResolverError("Incorrect type of argument number " + (i + 1) + ".",expr.paren.getLine(), expr.paren.getColumn());
                 }
             }
@@ -474,7 +474,7 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         Variable var = declare(stmt.name, new Variable(VarType.fromString(stmt.type.getLexeme()), null));
         if (stmt.initializer != null) {
             Variable value = resolve(stmt.initializer);
-            if (value.varType != var.varType) {
+            if ((value.varType != var.varType && value.varType != VarType.Function) || (value.varType == VarType.Function && ((Function)value).returnType != var.varType)) {
                 ErrorHandler.printResolverError("Variable initializer is of different type than variable.", stmt.name.getLine(), stmt.name.getColumn());
             }
         }

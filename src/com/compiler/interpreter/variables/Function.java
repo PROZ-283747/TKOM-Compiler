@@ -10,7 +10,7 @@ public class Function extends Variable implements Callable {
     private Statement.Function declaration;
     private Environment closure;
     private final List<Variable> params;
-    private VarType returnType;
+    public VarType returnType;
 
     public Function() {
         params = new LinkedList<>();
