@@ -347,21 +347,6 @@ public class TestInterpreter {
     }
 
     @Test
-    public void udefinedClassElement() {
-        String code = "class A{\n" +
-                "\tstring sA;\n" +
-                "\tvoid printClass(){\n" +
-                "\t\tprint(sA);\n" +
-                "\t}\n" +
-                "}\n" +
-                "object a = new A;" +
-                "print(a.sA);";
-        String expectedOutput = "null";
-        String expectedErrors = "";
-        testInterpreter(code, expectedOutput, expectedErrors);
-    }
-
-    @Test
     public void diffFunNamesInDiffScopes() {
         String code = "class C{\n" +
                 "string fun(){\n" +
@@ -417,6 +402,14 @@ public class TestInterpreter {
 
         String expectedOutput = "";
         String expectedErrors = "Error while resolving: Incorrect type of argument number 1. Line: 0 Column: 0";
+        testInterpreter(code, expectedOutput, expectedErrors);
+    }
+
+    @Test
+    public void stringConcatenation() {
+        String code = "print(\"jeden\" + \"drugi\");";
+        String expectedOutput = "jedendrugi";
+        String expectedErrors = "";
         testInterpreter(code, expectedOutput, expectedErrors);
     }
 

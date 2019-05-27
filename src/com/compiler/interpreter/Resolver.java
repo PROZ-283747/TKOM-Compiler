@@ -144,8 +144,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         if (left.varType != right.varType) {
             ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
 
-            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
-                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            if (left.varType != VarType.Fraction ) {
+                ErrorHandler.printResolverError("Operands must be fractions.", expr.operator.getLine(), expr.operator.getColumn());
             }
         }
 
@@ -160,8 +160,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         if (left.varType != right.varType) {
             ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
 
-            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
-                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            if (left.varType != VarType.Fraction ) {
+                ErrorHandler.printResolverError("Operands must be fractions.", expr.operator.getLine(), expr.operator.getColumn());
             }
         }
 
@@ -176,8 +176,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         if (left.varType != right.varType) {
             ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
 
-            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
-                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            if (left.varType != VarType.Fraction) {
+                ErrorHandler.printResolverError("Operands must be fractions.", expr.operator.getLine(), expr.operator.getColumn());
             }
         }
 
@@ -192,8 +192,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         if (left.varType != right.varType) {
             ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
 
-            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
-                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            if (left.varType != VarType.Fraction) {
+                ErrorHandler.printResolverError("Operands must be fractions.", expr.operator.getLine(), expr.operator.getColumn());
             }
         }
 
@@ -208,8 +208,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         if (left.varType != right.varType) {
             ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
 
-            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
-                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            if (left.varType != VarType.Fraction ) {
+                ErrorHandler.printResolverError("Operands must be fractions.", expr.operator.getLine(), expr.operator.getColumn());
             }
         }
 
@@ -224,8 +224,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         if (left.varType != right.varType) {
             ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
 
-            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
-                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            if (left.varType != VarType.Fraction) {
+                ErrorHandler.printResolverError("Operands must be fractions.", expr.operator.getLine(), expr.operator.getColumn());
             }
         }
 
@@ -240,8 +240,8 @@ public class Resolver implements Expression.Visitor<Variable>, Statement.Visitor
         if (left.varType != right.varType) {
             ErrorHandler.printResolverError("Operands must be of the same type.", expr.operator.getLine(), expr.operator.getColumn());
 
-            if (left.varType != VarType.Fraction && left.varType != VarType.String) {
-                ErrorHandler.printResolverError("Operands must be strings or fractions.", expr.operator.getLine(), expr.operator.getColumn());
+            if (left.varType != VarType.Fraction ) {
+                ErrorHandler.printResolverError("Operands must be fractions.", expr.operator.getLine(), expr.operator.getColumn());
             }
         }
 

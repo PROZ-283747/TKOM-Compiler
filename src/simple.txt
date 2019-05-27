@@ -6,37 +6,25 @@ string b = "abc";
 fraction fun(fraction f)
 {
 	fraction container[] = {3%4, 5%6, 6%7};
-	fraction numb = 7;
+	fraction numb = f;
 	
 	for(fraction i : container){
 		print(i);
 	}
 	
 	if(numb > 1%2){
-		numb = 10%25;
+		numb = numb - 1;
 	}
 	else{
 		numb = numb + 1;
 	}
 		
-	while(numb > 5){
-		numb = numb - 1;
+	while(numb < 5){
+		numb = numb + 1;
 		print("Still in while loop");
 	}
 
 	return numb;
 }
 
-class klasa{
-
-	string s = "abc";
-	fraction container[] = {3%4, 5%6, 6%7};
-
-	string funkcja(fraction fra){
-		fraction a=fra;
-		
-		return "Bleeeh!";
-	}
-}
-
-#fun(4%3);
+fun(4);

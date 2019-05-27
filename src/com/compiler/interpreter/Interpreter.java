@@ -372,10 +372,7 @@ public class Interpreter implements Expression.Visitor<Variable>, Statement.Visi
     @Override
     public Void visitPrintStmt(Statement.Print stmt) {
         Variable variable = evaluate(stmt.expression);
-        if(variable == null) //
-            System.out.println("null");
-        else
-            System.out.println(variable.value);
+        System.out.println(variable.value);
         return null;
     }
 

@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Environment implements Serializable {
     final Environment enclosing;
-    final Map<String, Variable> values = new HashMap<>(); // nazwa, typ, wartość
+    final Map<String, Variable> values = new HashMap<>(); // name, type, value
 
     public Environment() {
         enclosing = null;

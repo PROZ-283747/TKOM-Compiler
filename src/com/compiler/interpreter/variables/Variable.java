@@ -91,8 +91,6 @@ public class Variable {
 
     }
 
-    public boolean isDefined(){
-        return defined;
-    }
+
 }
 
